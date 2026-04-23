@@ -1,0 +1,140 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Order;
+use App\Models\OrderDetail;
+use Illuminate\Http\Request;
+
+class OrderController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = Order::query();
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('kode', 'like', '%' . $request->search . '%')
+                  ->orWhere('nama_customer', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->from) {
+            $query->whereDate('tanggal_pesan', '>=', $request->from);
+        }
+
+        if ($request->to) {
+            $query->whereDate('tanggal_pesan', '<=', $request->to);
+        }
+
+        $orders = $query->orderBy('tanggal_pesan', 'desc')
+                        ->paginate(8)
+                        ->withQueryString();
+
+        return view('orders.index', compact('orders'));
+    }
+
+    public function show($id)
+    {
+        $order = Order::with('details.product')->findOrFail($id);
+        return view('orders.show', compact('order'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $order = Order::findOrFail($id);
+
+        if ($order->status == 'selesai') {
+            return back();
+        }
+
+        $request->validate([
+            'status' => 'required|in:diproses,selesai'
+        ]);
+
+        // 🔥 FIX: update status, bukan kode
+        $order->update([
+            'status' => $request->status
+        ]);
+
+        return redirect()->back();
+    }
+
+    public function store(Request $request)
+    {
+        // 🔥 VALIDASI
+        $request->validate([
+            'nama' => 'required',
+            'no_hp' => 'required',
+            'alamat' => 'required',
+            'tanggal_kirim' => 'required|date|after_or_equal:' . now()->addDays(2)->toDateString(),
+            'payment' => 'required'
+        ]);
+
+        // 🔥 AMBIL CART
+$cart = session('cart', []);
+
+$totalProduk = 0;
+
+foreach ($cart as $item) {
+    $totalProduk += $item['harga'] * $item['qty'];
+}
+
+// 🔥 ONGKIR DARI FRONTEND
+$ongkir = $request->ongkir ?? 0;
+
+// 🔥 ADMIN FIX
+$admin = 1000;
+
+// 🔥 TOTAL AKHIR
+$total = $totalProduk + $ongkir + $admin;
+
+        // 🔥 SIMPAN ORDER TANPA KODE
+        $order = Order::create([
+            'kode' => null,
+            'nama_customer' => $request->nama,
+            'no_hp' => $request->no_hp,
+            'alamat' => $request->alamat,
+            'tanggal_pesan' => now(),
+            'tanggal_kirim' => $request->tanggal_kirim,
+            'metode_pembayaran' => $request->payment,
+            'ongkir' => $request->ongkir,
+            'total_harga' => $total,
+            'status' => 'diproses'
+        ]);
+
+        foreach ($cart as $id => $item) {
+            \App\Models\OrderDetail::create([
+                'order_id' => $order->id,
+                'product_id' => $id,
+                'qty' => $item['qty'],
+                'harga' => $item['harga'],
+            ]);
+        }
+
+        // 🔥 GENERATE KODE M-0001 DARI ID
+        $order->update([
+            'kode' => 'M-' . str_pad($order->id, 4, '0', STR_PAD_LEFT)
+        ]);
+
+        // 🔥 SIMPAN DETAIL PRODUK
+        foreach ($cart as $id => $item) {
+            OrderDetail::create([
+                'order_id' => $order->id,
+                'product_id' => $id,
+                'qty' => $item['qty'],
+                'harga' => $item['harga'],
+            ]);
+        }
+
+        // 🔥 KOSONGKAN CART
+        session()->forget('cart');
+
+        return redirect()->route('customer.pesanan')
+            ->with('success', 'Pesanan berhasil dibuat!');
+    }
+}
