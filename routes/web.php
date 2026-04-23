@@ -18,6 +18,10 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/test', function () {
+    return "OK HIDUP";
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -43,9 +47,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
     Route::get('/customer/pesanan-saya', [CustomerController::class, 'pesananSaya'])->name('customer.pesananSaya');
     Route::get('/customer/pesanan/{id}', [App\Http\Controllers\CustomerController::class, 'detailPesanan'])->name('customer.detailPesanan');
-    Route::get('/test', function () {
-    return "OK HIDUP";
-});
 });
 
 Route::post('/logout', function () {
