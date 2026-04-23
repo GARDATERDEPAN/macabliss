@@ -18,7 +18,7 @@ use App\Http\Controllers\CartController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return "AMAN";
 });
 
 Route::get('/test', function () {
