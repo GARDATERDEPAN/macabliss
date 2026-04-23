@@ -43,6 +43,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
     Route::get('/customer/pesanan-saya', [CustomerController::class, 'pesananSaya'])->name('customer.pesananSaya');
     Route::get('/customer/pesanan/{id}', [App\Http\Controllers\CustomerController::class, 'detailPesanan'])->name('customer.detailPesanan');
+    Route::get('/test', function () {
+    return "OK HIDUP";
+});
 });
 
 Route::post('/logout', function () {
