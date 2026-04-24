@@ -19,4 +19,15 @@ require __DIR__.'/../vendor/autoload.php';
 /** @var Application $app */
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
+error_log('STEP 1: START INDEX');
+
+require __DIR__.'/../vendor/autoload.php';
+
+error_log('STEP 2: AUTOLOAD OK');
+
+/** @var Application $app */
+$app = require_once __DIR__.'/../bootstrap/app.php';
+
+error_log('STEP 3: BOOTSTRAP OK');
+
 $app->handleRequest(Request::capture());
