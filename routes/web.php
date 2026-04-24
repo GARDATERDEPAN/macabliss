@@ -18,10 +18,6 @@ use App\Http\Controllers\CartController;
 */
 
 Route::get('/', function () {
-    return 'OK ROOT';
-});
-
-Route::get('/', function () {
     return view('welcome');
 });
 

@@ -1,6 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
@@ -18,16 +16,5 @@ require __DIR__.'/../vendor/autoload.php';
 // Bootstrap Laravel and handle the request...
 /** @var Application $app */
 $app = require_once __DIR__.'/../bootstrap/app.php';
-
-error_log('STEP 1: START INDEX');
-
-require __DIR__.'/../vendor/autoload.php';
-
-error_log('STEP 2: AUTOLOAD OK');
-
-/** @var Application $app */
-$app = require_once __DIR__.'/../bootstrap/app.php';
-
-error_log('STEP 3: BOOTSTRAP OK');
 
 $app->handleRequest(Request::capture());
