@@ -56,7 +56,6 @@ class OrderController extends Controller
             'status' => 'required|in:diproses,selesai'
         ]);
 
-        // 🔥 FIX: update status, bukan kode
         $order->update([
             'status' => $request->status
         ]);
@@ -76,24 +75,26 @@ class OrderController extends Controller
         ]);
 
         // 🔥 AMBIL CART
-$cart = session('cart', []);
+        $cart = session('cart', []);
 
-$totalProduk = 0;
+        if (empty($cart)) {
+            return back()->with('error', 'Keranjang kosong!');
+        }
 
-foreach ($cart as $item) {
-    $totalProduk += $item['harga'] * $item['qty'];
-}
+        // 🔥 HITUNG TOTAL PRODUK
+        $totalProduk = 0;
+        foreach ($cart as $item) {
+            $totalProduk += $item['harga'] * $item['qty'];
+        }
 
-// 🔥 ONGKIR DARI FRONTEND
-$ongkir = $request->ongkir ?? 0;
+        // 🔥 ONGKIR & ADMIN
+        $ongkir = $request->ongkir ?? 0;
+        $admin = 1000;
 
-// 🔥 ADMIN FIX
-$admin = 1000;
+        // 🔥 TOTAL AKHIR
+        $total = $totalProduk + $ongkir + $admin;
 
-// 🔥 TOTAL AKHIR
-$total = $totalProduk + $ongkir + $admin;
-
-        // 🔥 SIMPAN ORDER TANPA KODE
+        // 🔥 SIMPAN ORDER
         $order = Order::create([
             'kode' => null,
             'nama_customer' => $request->nama,
@@ -102,26 +103,12 @@ $total = $totalProduk + $ongkir + $admin;
             'tanggal_pesan' => now(),
             'tanggal_kirim' => $request->tanggal_kirim,
             'metode_pembayaran' => $request->payment,
-            'ongkir' => $request->ongkir,
+            'ongkir' => $ongkir,
             'total_harga' => $total,
             'status' => 'diproses'
         ]);
 
-        foreach ($cart as $id => $item) {
-            \App\Models\OrderDetail::create([
-                'order_id' => $order->id,
-                'product_id' => $id,
-                'qty' => $item['qty'],
-                'harga' => $item['harga'],
-            ]);
-        }
-
-        // 🔥 GENERATE KODE M-0001 DARI ID
-        $order->update([
-            'kode' => 'M-' . str_pad($order->id, 4, '0', STR_PAD_LEFT)
-        ]);
-
-        // 🔥 SIMPAN DETAIL PRODUK
+        // 🔥 SIMPAN DETAIL PRODUK (CUMA SEKALI!)
         foreach ($cart as $id => $item) {
             OrderDetail::create([
                 'order_id' => $order->id,
@@ -130,6 +117,11 @@ $total = $totalProduk + $ongkir + $admin;
                 'harga' => $item['harga'],
             ]);
         }
+
+        // 🔥 GENERATE KODE
+        $order->update([
+            'kode' => 'M-' . str_pad($order->id, 4, '0', STR_PAD_LEFT)
+        ]);
 
         // 🔥 KOSONGKAN CART
         session()->forget('cart');
