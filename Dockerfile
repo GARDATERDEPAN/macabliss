@@ -18,4 +18,12 @@ RUN npm install && npm run build
 
 RUN php artisan key:generate || true
 
+# 🔥 penting
+RUN chmod -R 775 storage bootstrap/cache
+
+# 🔥 penting
+RUN php artisan config:cache
+RUN php artisan route:cache || true
+RUN php artisan view:cache
+
 CMD ["php", "-S", "0.0.0.0:8080", "-t", "public"]
