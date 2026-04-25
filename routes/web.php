@@ -25,26 +25,31 @@ Route::get('/test', function () {
     return "OK HIDUP";
 });
 
-// CUSTOMER
+// ================= CUSTOMER =================
 Route::prefix('customer')->group(function () {
+
     Route::get('/beranda', [CustomerController::class, 'beranda'])->name('customer.beranda');
+
     Route::get('/pesanan', [CartController::class, 'index'])->name('customer.pesanan');
-    Route::get('/pembayaran', function () {
-        return view('customer.pembayaran');
-    })->name('customer.pembayaran');
+
+    // 🔥 FIX: JANGAN pakai function view langsung
+    Route::get('/pembayaran', [CustomerController::class, 'pembayaran'])->name('customer.pembayaran');
 
     Route::get('/pesanan-saya', [CustomerController::class, 'pesananSaya'])->name('customer.pesananSaya');
+
     Route::get('/pesanan/{id}', [CustomerController::class, 'detailPesanan'])->name('customer.detailPesanan');
 });
 
-// CART & CHECKOUT (PUBLIC)
+// ================= CART =================
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
 Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
 
 Route::post('/customer/cart/add/{id}', [CustomerController::class, 'addToCart'])->name('customer.cart.add');
 
+// ================= ORDER =================
 Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
+Route::post('/bayar/{id}', [OrderController::class, 'bayar'])->name('order.bayar');
 
 
 /*
@@ -82,6 +87,5 @@ Route::post('/logout', function () {
 
     return redirect('/');
 })->name('logout');
-
 
 require __DIR__.'/auth.php';

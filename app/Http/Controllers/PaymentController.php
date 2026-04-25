@@ -11,15 +11,17 @@ class PaymentController extends Controller
     {
         $query = Payment::with('order');
 
-        // SEARCH (kode pembayaran / kode order)
+        // 🔍 SEARCH
         if ($request->search) {
-            $query->where('kode_pembayaran', 'like', '%' . $request->search . '%')
-                  ->orWhereHas('order', function ($q) use ($request) {
-                      $q->where('kode', 'like', '%' . $request->search . '%');
-                  });
+            $query->where(function ($q) use ($request) {
+                $q->where('kode_pembayaran', 'like', '%' . $request->search . '%')
+                ->orWhereHas('order', function ($q2) use ($request) {
+                    $q2->where('kode', 'like', '%' . $request->search . '%');
+                });
+            });
         }
 
-        // FILTER STATUS
+        // 🔎 FILTER STATUS
         if ($request->status) {
             $query->where('status', $request->status);
         }

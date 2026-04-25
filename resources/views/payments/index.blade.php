@@ -35,7 +35,7 @@
                 <tr>
                     <th class="p-4 border text-center">ID Bayar</th>
                     <th class="p-4 border text-center">Kode</th>
-                    <th class="p-4 border text-center">Metode</th>
+                    <th class="p-4 border text-center">Metode Pembayaran</th>
                     <th class="p-4 border text-center">Jumlah</th>
                     <th class="p-4 border text-center">Status</th>
                     <th class="p-4 border text-center">Aksi</th>

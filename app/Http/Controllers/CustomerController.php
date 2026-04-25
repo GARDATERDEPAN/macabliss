@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Order;
 
 class CustomerController extends Controller
 {
@@ -55,5 +56,12 @@ class CustomerController extends Controller
     {
         $order = \App\Models\Order::with('details.product')->findOrFail($id);
         return view('customer.detail-pesanan', compact('order'));
+    }
+
+    public function pembayaran()
+    {
+        $order = Order::latest()->first(); // ambil order terakhir
+
+        return view('customer.pembayaran', compact('order'));
     }
 }

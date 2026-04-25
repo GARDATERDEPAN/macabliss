@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -31,9 +32,12 @@ class OrderController extends Controller
             $query->whereDate('tanggal_pesan', '<=', $request->to);
         }
 
-        $orders = $query->orderBy('tanggal_pesan', 'desc')
-                        ->paginate(8)
-                        ->withQueryString();
+        $orders = $query->select('orders.*')
+            ->distinct()
+            ->orderBy('tanggal_pesan', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate(8)
+            ->withQueryString();
 
         return view('orders.index', compact('orders'));
     }
@@ -65,6 +69,12 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+        if (session()->has('order_submitted')) {
+            return redirect()->back();
+        }
+
+        session()->put('order_submitted', true);
+
         // 🔥 VALIDASI
         $request->validate([
             'nama' => 'required',
@@ -108,7 +118,17 @@ class OrderController extends Controller
             'status' => 'diproses'
         ]);
 
-        // 🔥 SIMPAN DETAIL PRODUK (CUMA SEKALI!)
+        Payment::create([
+            'order_id' => $order->id,
+            'kode_pembayaran' => 'PAY-' . str_pad($order->id, 4, '0', STR_PAD_LEFT),
+            'metode' => $order->metode_pembayaran,
+            'payment_ref' => null,
+            'tanggal_bayar' => now(),
+            'jumlah' => $order->total_harga,
+            'status' => 'pending',
+        ]);
+
+        // 🔥 SIMPAN DETAIL PRODUK
         foreach ($cart as $id => $item) {
             OrderDetail::create([
                 'order_id' => $order->id,
@@ -128,5 +148,30 @@ class OrderController extends Controller
 
         return redirect()->route('customer.pesanan')
             ->with('success', 'Pesanan berhasil dibuat!');
+        
+        session()->forget('order_submitted');
+    }
+
+    // 🔥 FITUR BAYAR (INI YANG BARU)
+   public function bayar($id)
+    {
+        $order = Order::findOrFail($id);
+
+        if ($order->payment) {
+            return back()->with('error', 'Sudah ada pembayaran!');
+        }
+
+        Payment::create([
+            'order_id' => $order->id,
+            'kode_pembayaran' => 'PAY-' . str_pad($order->id, 4, '0', STR_PAD_LEFT),
+            'metode' => $order->metode_pembayaran,
+            'payment_ref' => null,
+            'tanggal_bayar' => now(), 
+            'jumlah' => $order->total_harga,
+            'status' => 'pending',
+        ]);
+
+        return redirect()->route('customer.pesanan')
+            ->with('success', 'Pembayaran berhasil dibuat!');
     }
 }

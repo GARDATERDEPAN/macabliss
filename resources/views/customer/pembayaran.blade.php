@@ -168,7 +168,10 @@
         </div>
         
 
-        <button type="submit" class="w-full bg-red-400 text-white py-3 rounded-lg">
+        <button 
+            type="submit"
+            onclick="this.disabled=true; this.innerText='Memproses...'; this.form.submit();"
+            class="w-full bg-red-400 text-white py-3 rounded-lg">
             Bayar Sekarang
         </button>
 
