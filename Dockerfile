@@ -2,9 +2,11 @@ FROM php:8.3-cli
 
 WORKDIR /app
 
-# install dependency
+# install dependency system + node
 RUN apt-get update && apt-get install -y \
     git unzip curl libzip-dev zip \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
     && docker-php-ext-install pdo pdo_mysql
 
 # install composer
@@ -16,11 +18,11 @@ COPY . .
 # install laravel deps
 RUN composer install --no-dev --optimize-autoloader
 
-# build vite
+# install & build vite
 RUN npm install && npm run build
 
-# generate key (safe)
+# generate key
 RUN php artisan key:generate || true
 
-# RUN SERVER (INI KUNCI 🔥)
+# run server
 CMD php -S 0.0.0.0:$PORT -t public
