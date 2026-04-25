@@ -26,4 +26,4 @@ RUN php artisan config:cache
 RUN php artisan route:cache || true
 RUN php artisan view:cache
 
-CMD ["php", "-S", "0.0.0.0:8080", "-t", "public"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
