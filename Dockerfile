@@ -18,4 +18,4 @@ RUN npm install && npm run build
 
 RUN php artisan key:generate || true
 
-CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8080} -t public"]
+CMD ["php", "-S", "0.0.0.0:8080", "-t", "public"]
