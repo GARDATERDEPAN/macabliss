@@ -18,15 +18,15 @@ RUN npm install && npm run build
 
 RUN php artisan key:generate || true
 
+# permission penting
 RUN chmod -R 775 storage bootstrap/cache
 
-# 🔥 SAFE CLEAR (ANTI ERROR)
+# 🔥 CLEAR CACHE
 RUN php artisan config:clear
-RUN php artisan cache:clear || true
-RUN php artisan route:clear || true
-RUN php artisan view:clear || true
+RUN php artisan route:clear
+RUN php artisan view:clear
 
-# 🔥 OPTIONAL (kalau pakai DB MySQL Railway nanti)
+# 🔥 MIGRATE DATABASE
 RUN php artisan migrate --force || true
 
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
