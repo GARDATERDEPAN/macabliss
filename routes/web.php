@@ -19,10 +19,6 @@ use App\Http\Controllers\CartController;
 
 Route::get('/', [CustomerController::class, 'beranda'])->name('home');
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
 // ================= CUSTOMER =================
 Route::prefix('customer')->group(function () {
 
@@ -30,7 +26,6 @@ Route::prefix('customer')->group(function () {
 
     Route::get('/pesanan', [CartController::class, 'index'])->name('customer.pesanan');
 
-    // 🔥 FIX: JANGAN pakai function view langsung
     Route::get('/pembayaran', [CustomerController::class, 'pembayaran'])->name('customer.pembayaran');
 
     Route::get('/pesanan-saya', [CustomerController::class, 'pesananSaya'])->name('customer.pesananSaya');
@@ -52,11 +47,11 @@ Route::post('/bayar/{id}', [OrderController::class, 'bayar'])->name('order.bayar
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN (WAJIB LOGIN)
+| ADMIN (WAJIB LOGIN + ROLE ADMIN)
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -85,5 +80,6 @@ Route::post('/logout', function () {
 
     return redirect('/');
 })->name('logout');
+
 
 require __DIR__.'/auth.php';
