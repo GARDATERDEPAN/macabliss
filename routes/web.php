@@ -17,13 +17,11 @@ use App\Http\Controllers\CartController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [CustomerController::class, 'beranda'])->name('home');
 
-Route::get('/test', function () {
-    return "OK HIDUP";
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 
 // ================= CUSTOMER =================
 Route::prefix('customer')->group(function () {
