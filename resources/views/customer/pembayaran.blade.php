@@ -46,8 +46,9 @@
                 <div class="relative z-50">
 
                     <div class="flex items-center gap-2 relative">
-                        <input type="text" id="alamat" name="alamat" required class="flex-1 border rounded-lg px-3 py-2
-                            placeholder="Masukkan alamat di Samarinda...>
+                        <input type="text" id="alamat" name="alamat" required
+                            class="flex-1 border rounded-lg px-3 py-2"
+                            placeholder="Masukkan alamat di Samarinda...">
 
                         <button type="button"
                             onclick="refreshLocation()"
@@ -172,12 +173,19 @@
             type="submit"
             onclick="this.disabled=true; this.innerText='Memproses...'; this.form.submit();"
             class="w-full bg-red-400 text-white py-3 rounded-lg">
-            Bayar Sekarang
+            Pesan Sekarang
         </button>
 
     </div>
 
 </form>
+
+@if ($errors->any())
+    <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
+        {{ $errors->first() }}
+    </div>
+@endif
+
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

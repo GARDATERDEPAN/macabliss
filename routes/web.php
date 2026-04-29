@@ -17,7 +17,7 @@ use App\Http\Controllers\CartController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', [CustomerController::class, 'beranda'])->name('home');
+Route::get('/', [CustomerController::class, 'tentang'])->name('home');
 
 // ================= CUSTOMER =================
 Route::prefix('customer')->group(function () {
@@ -31,6 +31,8 @@ Route::prefix('customer')->group(function () {
     Route::get('/pesanan-saya', [CustomerController::class, 'pesananSaya'])->name('customer.pesananSaya');
 
     Route::get('/pesanan/{id}', [CustomerController::class, 'detailPesanan'])->name('customer.detailPesanan');
+
+    Route::get('/tentang-kami', [CustomerController::class, 'tentang'])->name('customer.tentang');
 });
 
 // ================= CART =================

@@ -64,4 +64,9 @@ class CustomerController extends Controller
 
         return view('customer.pembayaran', compact('order'));
     }
+
+    public function tentang()
+    {
+        return view('customer.tentang');
+    }
 }

@@ -17,7 +17,7 @@
 
 <body class="font-sans antialiased bg-gray-100">
 
-    <!-- HEADER (SAMA ADMIN FEEL) -->
+    <!-- HEADER -->
     <header class="bg-white border-b shadow-sm">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-3.5 flex items-center justify-between">
 
@@ -32,6 +32,7 @@
             <!-- NAV -->
             <nav class="flex items-center gap-6 text-sm font-medium ml-4">
 
+                <!-- BERANDA -->
                 <a href="{{ route('customer.beranda') }}" 
                    class="flex items-center gap-1 transition
                    {{ request()->routeIs('customer.beranda') ? 'text-red-500' : 'text-gray-500 hover:text-red-500' }}">
@@ -39,6 +40,7 @@
                     <span>Beranda</span>
                 </a>
 
+                <!-- KERANJANG -->
                 <a href="{{ route('customer.pesanan') }}" 
                    class="flex items-center gap-1 transition
                    {{ request()->routeIs('customer.pesanan') ? 'text-red-500' : 'text-gray-500 hover:text-red-500' }}">
@@ -46,18 +48,28 @@
                     <span>Keranjang</span>
                 </a>
 
+                <!-- RIWAYAT -->
                 <a href="{{ route('customer.pesananSaya') }}" 
-                    class="flex items-center gap-1 transition
-                    {{ request()->routeIs('customer.pesananSaya') ? 'text-red-500' : 'text-gray-500 hover:text-red-500' }}">
+                   class="flex items-center gap-1 transition
+                   {{ request()->routeIs('customer.pesananSaya') ? 'text-red-500' : 'text-gray-500 hover:text-red-500' }}">
                     <i data-lucide="package" class="w-4 h-4"></i>
                     <span>Riwayat</span>
                 </a>
 
+                <!-- PEMBAYARAN -->
                 <a href="{{ route('customer.pembayaran') }}" 
                    class="flex items-center gap-1 transition
                    {{ request()->routeIs('customer.pembayaran') ? 'text-red-500' : 'text-gray-500 hover:text-red-500' }}">
                     <i data-lucide="credit-card" class="w-4 h-4"></i>
                     <span>Bayar</span>
+                </a>
+
+                <!--  TENTANG KAMI -->
+                <a href="{{ route('customer.tentang') }}" 
+                   class="flex items-center gap-1 transition
+                   {{ request()->routeIs('customer.tentang') ? 'text-red-500' : 'text-gray-500 hover:text-red-500' }}">
+                    <i data-lucide="info" class="w-4 h-4"></i>
+                    <span>Informasi</span>
                 </a>
 
             </nav>

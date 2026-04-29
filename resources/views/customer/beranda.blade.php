@@ -31,33 +31,6 @@
 
     </div>
 
-    <div class="bg-white border rounded-xl shadow-sm p-5 mb-6 flex items-start gap-4">
-
-    <!-- ICON -->
-    <div class="bg-red-100 text-red-500 p-3 rounded-full">
-        <i data-lucide="map-pin" class="w-6 h-6"></i>
-    </div>
-
-    <!-- TEXT -->
-    <div class="flex-1">
-        <h3 class="font-semibold text-gray-800">
-            Lokasi Rumah Produksi Macabliss
-        </h3>
-
-        <p class="text-sm text-gray-500">
-            Jl. Merdeka Gang Otok No. 54 B, Samarinda
-        </p>
-
-        <!-- BUTTON -->
-        <a href="https://www.google.com/maps?q=-0.4863,117.1665"
-           target="_blank"
-           class="inline-block mt-2 text-sm text-blue-600 hover:underline">
-            Lihat di Google Maps →
-        </a>
-    </div>
-
-</div>
-
     <!-- LIST -->
     <div class="bg-white rounded-xl shadow-sm border">
 

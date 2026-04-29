@@ -32,9 +32,7 @@ class OrderController extends Controller
             $query->whereDate('tanggal_pesan', '<=', $request->to);
         }
 
-        $orders = $query->select('orders.*')
-            ->distinct()
-            ->orderBy('tanggal_pesan', 'desc')
+        $orders = $query->orderBy('tanggal_pesan', 'desc')
             ->orderBy('id', 'desc')
             ->paginate(8)
             ->withQueryString();
@@ -69,12 +67,6 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
-        if (session()->has('order_submitted')) {
-            return redirect()->back();
-        }
-
-        session()->put('order_submitted', true);
-
         // 🔥 VALIDASI
         $request->validate([
             'nama' => 'required',
@@ -118,6 +110,7 @@ class OrderController extends Controller
             'status' => 'diproses'
         ]);
 
+        // 🔥 SIMPAN PAYMENT (HANYA SEKALI DI SINI)
         Payment::create([
             'order_id' => $order->id,
             'kode_pembayaran' => 'PAY-' . str_pad($order->id, 4, '0', STR_PAD_LEFT),
@@ -138,25 +131,24 @@ class OrderController extends Controller
             ]);
         }
 
-        // 🔥 GENERATE KODE
+        // 🔥 GENERATE KODE ORDER
         $order->update([
             'kode' => 'M-' . str_pad($order->id, 4, '0', STR_PAD_LEFT)
         ]);
 
-        // 🔥 KOSONGKAN CART
+        // 🔥 CLEAR SESSION
         session()->forget('cart');
 
         return redirect()->route('customer.pesanan')
             ->with('success', 'Pesanan berhasil dibuat!');
-        
-        session()->forget('order_submitted');
     }
 
-    // 🔥 FITUR BAYAR (INI YANG BARU)
-   public function bayar($id)
+    // 🔥 OPTIONAL (boleh dipakai kalau mau manual bayar)
+    public function bayar($id)
     {
         $order = Order::findOrFail($id);
 
+        // 🔥 CEK SUDAH ADA PAYMENT
         if ($order->payment) {
             return back()->with('error', 'Sudah ada pembayaran!');
         }
@@ -166,7 +158,7 @@ class OrderController extends Controller
             'kode_pembayaran' => 'PAY-' . str_pad($order->id, 4, '0', STR_PAD_LEFT),
             'metode' => $order->metode_pembayaran,
             'payment_ref' => null,
-            'tanggal_bayar' => now(), 
+            'tanggal_bayar' => now(),
             'jumlah' => $order->total_harga,
             'status' => 'pending',
         ]);

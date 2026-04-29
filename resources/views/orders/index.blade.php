@@ -71,7 +71,7 @@
                     </td>
 
                     <td class="p-4 border text-center">
-                        {{ $order->tanggal_pesan }}
+                        {{ \Carbon\Carbon::parse($order->tanggal_pesan)->timezone('Asia/Makassar')->format('d-m-Y H:i') }}
                     </td>
 
                     <td class="p-4 border text-center">
