@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Laravel') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -43,6 +44,15 @@
                {{ request()->is('products*') ? 'bg-red-300 text-red-600 font-semibold' : 'hover:bg-red-100' }}">
                 <i data-lucide="box" class="w-4 h-4"></i>
                 Produk
+            </a>
+
+            <a href="/categories" 
+            class="flex items-center gap-2 px-4 py-2 rounded-lg 
+            {{ request()->is('categories*') ? 'bg-red-300 text-red-600 font-semibold' : 'hover:bg-red-100' }}">
+                
+                <i data-lucide="shapes" class="w-4 h-4"></i>
+
+                Kategori
             </a>
 
             <a href="/orders" 

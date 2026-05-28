@@ -24,10 +24,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        // 🔥 LOGIN DULU
         $request->authenticate();
 
-        // 🔥 CEK ROLE ADMIN
         if (auth()->user()->role !== 'admin') {
             Auth::logout();
 
@@ -36,10 +34,8 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
-        // 🔥 REGENERATE SESSION
         $request->session()->regenerate();
 
-        // 🔥 REDIRECT KE DASHBOARD
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

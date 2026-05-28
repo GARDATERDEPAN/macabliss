@@ -131,7 +131,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="text-center p-4">Tidak ada data</td>
+                    <td colspan="5" class="text-center text-gray-500 p-4">Tidak ada data produk</td>
                 </tr>
                 @endforelse
 

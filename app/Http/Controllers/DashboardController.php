@@ -2,23 +2,47 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\Payment;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        return view('dashboard', [
-            'totalProduk' => \App\Models\Product::count(),
-            'totalOrder' => \App\Models\Order::count(),
-            'totalPayment' => \App\Models\Payment::count(),
-            'totalPendapatan' => \App\Models\Payment::where('status', 'lunas')->sum('jumlah'),
+        $totalProduk = Product::count();
 
-            'orderDiproses' => \App\Models\Order::where('status', 'diproses')->count(),
-            'orderSelesai' => \App\Models\Order::where('status', 'selesai')->count(),
+        $totalPesanan = Order::count();
 
-            'latestOrders' => \App\Models\Order::latest()->take(5)->get(),
-            'latestPayments' => \App\Models\Payment::latest()->take(5)->get(),
-        ]);
+        $paymentLunas = Payment::where('status', 'paid')->count();
+
+        $paymentPending = Payment::where('status', 'pending')->count();
+
+        $totalPendapatan = Payment::where('status', 'paid')
+                            ->sum('jumlah');
+
+        // PESANAN DIPROSES
+        $pesananDiproses = Order::where('status', 'diproses')->count();
+
+        // PESANAN SELESAI
+        $pesananSelesai = Order::where('status', 'selesai')->count();
+
+        // PESANAN TERBARU
+        $latestOrders = Order::latest()->take(5)->get();
+
+        // PAYMENT TERBARU
+        $latestPayments = Payment::latest()->take(5)->get();
+
+        return view('dashboard', compact(
+            'totalProduk',
+            'totalPesanan',
+            'paymentLunas',
+            'paymentPending',
+            'totalPendapatan',
+            'pesananDiproses',
+            'pesananSelesai',
+            'latestOrders',
+            'latestPayments'
+        ));
     }
 }

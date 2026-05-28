@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     protected $fillable = [
+        'session_id',
         'kode',
         'nama_customer',
         'no_hp',
@@ -14,7 +15,7 @@ class Order extends Model
         'tanggal_pesan',
         'tanggal_kirim',
         'metode_pembayaran',
-        'metode_pengambilan', // 🔥 kalau kamu pakai ini
+        'metode_pengambilan',
         'ongkir',
         'total_harga',
         'status',

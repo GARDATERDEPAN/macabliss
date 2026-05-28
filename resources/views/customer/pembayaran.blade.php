@@ -10,6 +10,11 @@
 #suggestions {
     right: 56px;
 }
+
+.snap-midtrans,
+#snap-midtrans {
+    z-index: 999999 !important;
+}
 </style>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -20,8 +25,9 @@
         Checkout
     </h1>
 
-    <form action="{{ route('checkout.store') }}" method="POST">
+    <form action="{{ route('checkout.store') }}" method="POST" id="checkout-form">
     @csrf
+
     <input type="hidden" name="ongkir" id="ongkirInput">
     <input type="hidden" name="total_harga" id="totalInput">
 
@@ -30,31 +36,61 @@
         <div class="space-y-4">
 
             <div>
-                <label class="text-sm">Nama<span class="text-red-500">*</span></label>
-                <input type="text" name="nama" required class="w-full border rounded-lg px-3 py-2">
+                <label class="text-sm">
+                    Nama
+                    <span class="text-red-500">*</span>
+                </label>
+
+                <input
+                    type="text"
+                    name="nama"
+                    required
+                    class="w-full border rounded-lg px-3 py-2">
             </div>
 
             <div>
-                <label class="text-sm">No. Handphone<span class="text-red-500">*</span></label>
-                <input type="text" name="no_hp" required class="w-full border rounded-lg px-3 py-2">
+                <label class="text-sm">
+                    No. Handphone
+                    <span class="text-red-500">*</span>
+                </label>
+
+                <input
+                    type="text"
+                    name="no_hp"
+                    required
+                    class="w-full border rounded-lg px-3 py-2">
             </div>
 
             <!-- ALAMAT -->
             <div>
-                <label class="text-sm">Alamat<span class="text-red-500">*</span></label>
+
+                <label class="text-sm">
+                    Alamat
+                    <span class="text-red-500">*</span>
+                </label>
 
                 <div class="relative z-50">
 
                     <div class="flex items-center gap-2 relative">
-                        <input type="text" id="alamat" name="alamat" required
+
+                        <input
+                            type="text"
+                            id="alamat"
+                            name="alamat"
+                            required
+                            autocomplete="off"
                             class="flex-1 border rounded-lg px-3 py-2"
                             placeholder="Masukkan alamat di Samarinda...">
 
-                        <button type="button"
+                        <button
+                            type="button"
                             onclick="refreshLocation()"
                             class="border rounded-lg p-2 text-gray-500 hover:text-red-500 hover:border-red-400">
+
                             <i data-lucide="map-pin" class="w-5 h-5"></i>
+
                         </button>
+
                     </div>
 
                     <div id="suggestions"
@@ -65,51 +101,131 @@
 
                 <!-- MAP -->
                 <div class="mt-3">
-                    <div id="map" style="height:260px; width:100%; border-radius:12px;"></div>
+
+                    <div id="map"
+                        style="height:260px; width:100%; border-radius:12px;">
+                    </div>
+
                 </div>
+
             </div>
 
             <div>
-                <label class="text-sm">Tanggal Kirim<span class="text-red-500">*</span></label>
-                <input type="date" name="tanggal_kirim" id="tanggal_kirim" required class="w-full border rounded-lg px-3 py-2">
+
+                <label class="text-sm">
+                    Tanggal Kirim
+                    <span class="text-red-500">*</span>
+                </label>
+
+                <input
+                    type="date"
+                    name="tanggal_kirim"
+                    id="tanggal_kirim"
+                    required
+                    class="w-full border rounded-lg px-3 py-2">
+
             </div>
 
         </div>
 
+        <!-- PAYMENT -->
         <div>
-            <p class="font-semibold mb-2">Metode Pembayaran</p>
+
+            <p class="font-semibold mb-2">
+                Metode Pembayaran
+            </p>
 
             <div class="flex gap-4">
-                <label><input type="radio" name="payment" value="QRIS" required> QRIS</label>
-                <label><input type="radio" name="payment" value="COD" required> COD</label>
+
+                <label>
+                    <input
+                        type="radio"
+                        name="payment"
+                        value="QRIS"
+                        checked
+                        required>
+
+                    QRIS
+                </label>
+
+                <label>
+                    <input
+                        type="radio"
+                        name="payment"
+                        value="COD"
+                        required>
+
+                    COD
+                </label>
+
             </div>
+
         </div>
 
+        <!-- DELIVERY -->
         <div>
-            <p class="font-semibold mb-2">Metode Pengambilan</p>
+
+            <p class="font-semibold mb-2">
+                Metode Pengambilan
+            </p>
 
             <div class="flex gap-4">
-                <label><input type="radio" name="delivery_type" value="delivery" checked> Delivery</label>
-                <label><input type="radio" name="delivery_type" value="pickup"> Pick Up</label>
+
+                <label>
+                    <input
+                        type="radio"
+                        name="delivery_type"
+                        value="delivery"
+                        checked>
+
+                    Delivery
+                </label>
+
+                <label>
+                    <input
+                        type="radio"
+                        name="delivery_type"
+                        value="pickup">
+
+                    Pick Up
+                </label>
+
             </div>
+
         </div>
 
+        <!-- PESANAN -->
         <div class="border-t pt-4">
 
             <div class="bg-white border rounded-xl p-4 space-y-3">
 
-                <p class="font-semibold text-gray-700">Pesanan</p>
+                <p class="font-semibold text-gray-700">
+                    Pesanan
+                </p>
+
+                @php
+                    $subtotal = array_sum(
+                        array_map(
+                            fn($i) => $i['harga'] * $i['qty'],
+                            session('cart', [])
+                        )
+                    );
+                @endphp
 
                 @foreach(session('cart', []) as $item)
+
                 <div class="flex justify-between items-center text-sm">
 
                     <div>
+
                         <p class="font-medium text-gray-800">
                             {{ $item['nama_produk'] }}
                         </p>
+
                         <p class="text-xs text-gray-400">
                             x{{ $item['qty'] }}
                         </p>
+
                     </div>
 
                     <div class="font-semibold text-gray-700">
@@ -117,41 +233,60 @@
                     </div>
 
                 </div>
+
                 @endforeach
 
             </div>
 
         </div>
 
+        <!-- RINGKASAN -->
         <div class="border-t pt-4">
 
             <div class="bg-gray-50 rounded-xl p-4 space-y-3">
 
                 <div class="flex justify-between text-sm">
-                    <span class="text-gray-500">Harga Produk</span>
-                    <span class="font-medium">
-                        Rp {{ number_format(array_sum(array_map(fn($i) => $i['harga'] * $i['qty'], session('cart', []))),0,',','.') }}
+
+                    <span class="text-gray-500">
+                        Harga Produk
                     </span>
+
+                    <span class="font-medium">
+                        Rp {{ number_format($subtotal,0,',','.') }}
+                    </span>
+
                 </div>
 
-                <div class="flex justify-between text-sm" id="ongkirWrapper">
-                    <span class="text-gray-500">Biaya Pengiriman</span>
+                <div class="flex justify-between text-sm"
+                    id="ongkirWrapper">
+
+                    <span class="text-gray-500">
+                        Biaya Pengiriman
+                    </span>
+
                     <span id="ongkir" class="font-medium">
                         Rp 0
                     </span>
+
                 </div>
 
                 <div class="flex justify-between text-sm">
-                    <span class="text-gray-500">Biaya Admin</span>
+
+                    <span class="text-gray-500">
+                        Biaya Admin
+                    </span>
+
                     <span class="font-medium">
                         Rp 1.000
                     </span>
+
                 </div>
 
             </div>
 
         </div>
-        
+
+        <!-- TOTAL -->
         <div class="mt-4">
 
             <div class="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex justify-between items-center">
@@ -160,30 +295,78 @@
                     Total Pembayaran
                 </span>
 
-                <span id="totalAkhir" class="text-lg font-bold text-red-500">
-                    Rp {{ number_format(array_sum(array_map(fn($i) => $i['harga'] * $i['qty'], session('cart', []))),0,',','.') }}
+                <span id="totalAkhir"
+                    class="text-lg font-bold text-red-500">
+
+                    Rp {{ number_format($subtotal + 1000,0,',','.') }}
+
                 </span>
 
             </div>
 
         </div>
-        
 
-        <button 
-            type="submit"
-            onclick="this.disabled=true; this.innerText='Memproses...'; this.form.submit();"
-            class="w-full bg-red-400 text-white py-3 rounded-lg">
+        <!-- BUTTON -->
+        <button
+            type="button"
+            id="pay-button"
+            class="w-full bg-red-400 hover:bg-red-500 text-white py-3 rounded-lg transition">
+
             Pesan Sekarang
+
         </button>
 
     </div>
 
 </form>
 
-@if ($errors->any())
-    <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
-        {{ $errors->first() }}
+<!-- GLOBAL MODAL -->
+<div id="globalModal"
+    class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[99999]">
+
+    <div class="bg-white rounded-2xl p-8 w-[350px] text-center shadow-2xl">
+
+        <div id="modalIcon"
+            class="text-5xl mb-4">
+
+            ℹ️
+
+        </div>
+
+        <h2 id="modalTitle"
+            class="text-2xl font-bold mb-2">
+
+            Informasi
+
+        </h2>
+
+        <p id="modalMessage"
+            class="text-gray-600 mb-6">
+
+            Pesan modal
+
+        </p>
+
+        <button
+            onclick="closeGlobalModal()"
+            class="bg-red-400 hover:bg-red-500 text-white px-6 py-2 rounded-xl">
+
+            OK
+
+        </button>
+
     </div>
+
+</div>
+
+@if ($errors->any())
+
+<div class="bg-red-100 text-red-700 p-3 rounded mb-4 mt-4">
+
+    {{ $errors->first() }}
+
+</div>
+
 @endif
 
 </div>
@@ -192,113 +375,155 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <script>
-let map = L.map('map').setView([-0.5022, 117.1536], 13);
+
+lucide.createIcons();
+
+/* =========================
+    MAP
+========================= */
+
+let map = L.map('map')
+    .setView([-0.5022, 117.1536], 13);
+
 let marker;
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+let currentLat = null;
+let currentLng = null;
+
+L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
     attribution: 'OSM'
 }).addTo(map);
 
-// FIX map blank
-setTimeout(() => map.invalidateSize(), 300);
+setTimeout(() => {
+    map.invalidateSize();
+}, 300);
 
-// AUTO GPS
+/* =========================
+    GPS AUTO
+========================= */
+
 navigator.geolocation.getCurrentPosition(pos => {
+
     let lat = pos.coords.latitude;
     let lng = pos.coords.longitude;
 
     map.setView([lat, lng], 16);
+
     setMarker(lat, lng);
+
 });
 
-// CLICK MAP
+/* =========================
+    MAP CLICK
+========================= */
+
 map.on('click', function(e) {
-    setMarker(e.latlng.lat, e.latlng.lng);
+
+    setMarker(
+        e.latlng.lat,
+        e.latlng.lng
+    );
+
 });
 
-// REFRESH GPS
+/* =========================
+    REFRESH GPS
+========================= */
+
 function refreshLocation() {
 
     if (!navigator.geolocation) {
+
         alert("GPS tidak tersedia");
+
         return;
+
     }
 
     navigator.geolocation.getCurrentPosition(pos => {
+
         let lat = pos.coords.latitude;
         let lng = pos.coords.longitude;
 
         map.setView([lat, lng], 16);
+
         setMarker(lat, lng);
+
     });
+
 }
 
-// 🔥 FIX UTAMA (ALAMAT FULL)
+/* =========================
+    SET MARKER
+========================= */
+
 function setMarker(lat, lng) {
 
-    currentLat = lat;
-    currentLng = lng;
+    currentLat = parseFloat(lat);
+    currentLng = parseFloat(lng);
 
     updateOngkir();
 
-    if (marker) map.removeLayer(marker);
-    marker = L.marker([lat, lng]).addTo(map);
-    
-    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&lat=${lat}&lon=${lng}`)
-        .then(res => res.json())
-        .then(data => {
+    if (marker) {
 
-            let a = data.address;
+        map.removeLayer(marker);
 
-            let city = a.city || a.town || a.county || '';
+    }
 
-            if (!city.toLowerCase().includes('samarinda')) {
-                alert('Lokasi harus di Samarinda!');
-                return;
-            }
+    marker = L.marker([lat, lng])
+        .addTo(map);
 
-            // 🔥 FIX LEBIH LENGKAP
-            let jalan = (
-                a.road ||
-                a.residential ||
-                a.pedestrian ||
-                a.footway ||
-                a.neighbourhood ||
-                a.hamlet ||
-                ''
-            )
-            .replace(/^jalan\s+/i, '')
-            .replace(/^jl\.?\s+/i, '')
-            .trim();
+    fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&lat=${lat}&lon=${lng}`
+    )
+    .then(res => res.json())
+    .then(data => {
 
-            let kelurahan = a.suburb || a.village || a.hamlet || a.neighbourhood || '';
-            let kecamatan = (
-                a.city_district ||
-                a.suburb ||
-                a.town ||
-                a.county ||
-                a.state_district ||
-                ''
+        if (!data.address) return;
+
+        let a = data.address;
+
+        let city =
+            a.city ||
+            a.town ||
+            a.county ||
+            '';
+
+        if (
+            city &&
+            !city.toLowerCase().includes('samarinda')
+        ) {
+
+            showGlobalModal(
+                '⚠️',
+                'Lokasi Tidak Valid',
+                'Lokasi harus berada di Samarinda.'
             );
-            let kota = 'Samarinda';
-            let kodepos = a.postcode || '';
 
-            let alamat = [
-                jalan ? `Jl. ${jalan}` : '',
-                kelurahan,
-                kecamatan,
-                kota,
-                kodepos
-            ].filter(Boolean).join(', ');
+            return;
 
-            document.getElementById('alamat').value = alamat || 'Lokasi tidak lengkap';
-        });
+        }
+
+        document.getElementById('alamat').value =
+            data.display_name || '';
+
+    });
+
 }
 
-/* AUTOCOMPLETE */
+/* =========================
+    AUTOCOMPLETE
+========================= */
+
 let debounceTimer;
-const input = document.getElementById('alamat');
-const suggestionBox = document.getElementById('suggestions');
+
+const input =
+    document.getElementById('alamat');
+
+const suggestionBox =
+    document.getElementById('suggestions');
 
 input.addEventListener('input', function () {
 
@@ -307,73 +532,90 @@ input.addEventListener('input', function () {
     let query = this.value;
 
     if (query.length < 3) {
+
         suggestionBox.classList.add('hidden');
+
         return;
+
     }
 
     debounceTimer = setTimeout(() => {
 
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${query}, Samarinda&limit=5`)
-            .then(res => res.json())
-            .then(data => {
+        fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${query}, Samarinda&limit=5`
+        )
+        .then(res => res.json())
+        .then(data => {
 
-                suggestionBox.innerHTML = '';
+            suggestionBox.innerHTML = '';
 
-                data.forEach(item => {
+            data.forEach(item => {
 
-                    if (!item.display_name.toLowerCase().includes('samarinda')) return;
+                let div =
+                    document.createElement('div');
 
-                    let div = document.createElement('div');
-                    div.className = "px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm";
+                div.className =
+                    "px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm";
 
-                    let a = item.address || {};
+                div.innerText =
+                    item.display_name;
 
-                    let jalan = a.road || '';
-                    let kelurahan = a.suburb || a.village || '';
-                    let kecamatan = a.city_district || a.town || '';
-                    let kodepos = a.postcode || '';
+                div.onclick = () => {
 
-                    let formatted = [
-                        jalan,
-                        kelurahan,
-                        kecamatan,
-                        kodepos
-                    ].filter(Boolean).join(', ');
+                    input.value =
+                        item.display_name;
 
-                    div.innerText = formatted;
+                    suggestionBox.classList.add('hidden');
 
-                    div.onclick = () => {
+                    map.setView(
+                        [item.lat, item.lon],
+                        16
+                    );
 
-                        input.value = formatted;
-                        suggestionBox.classList.add('hidden');
+                    setMarker(
+                        item.lat,
+                        item.lon
+                    );
 
-                        map.setView([item.lat, item.lon], 16);
+                };
 
-                        if (marker) map.removeLayer(marker);
-                        marker = L.marker([item.lat, item.lon]).addTo(map);
-                    };
+                suggestionBox.appendChild(div);
 
-                    suggestionBox.appendChild(div);
-                });
-
-                suggestionBox.classList.remove('hidden');
             });
 
+            suggestionBox.classList.remove('hidden');
+
+        });
+
     }, 400);
+
 });
 
 document.addEventListener('click', function (e) {
-    if (!e.target.closest('#alamat') && !e.target.closest('#suggestions')) {
+
+    if (
+        !e.target.closest('#alamat')
+        &&
+        !e.target.closest('#suggestions')
+    ) {
+
         suggestionBox.classList.add('hidden');
+
     }
+
 });
 
-lucide.createIcons();
+/* =========================
+    TANGGAL MINIMAL
+========================= */
 
-const inputTanggal = document.getElementById('tanggal_kirim');
+const inputTanggal =
+    document.getElementById('tanggal_kirim');
 
 let today = new Date();
+
 let minDate = new Date();
+
 minDate.setDate(today.getDate() + 2);
 
 let yyyy = minDate.getFullYear();
@@ -382,43 +624,67 @@ let dd = String(minDate.getDate()).padStart(2, '0');
 
 inputTanggal.min = `${yyyy}-${mm}-${dd}`;
 
-['nama','no_hp','alamat'].forEach(id => {
-    const el = document.querySelector(`[name=${id}]`);
+/* =========================
+    LOCAL STORAGE
+========================= */
 
-    if(localStorage.getItem(id)){
-        el.value = localStorage.getItem(id);
+['nama','no_hp','alamat'].forEach(id => {
+
+    const el =
+        document.querySelector(`[name=${id}]`);
+
+    if (localStorage.getItem(id)) {
+
+        el.value =
+            localStorage.getItem(id);
+
     }
 
     el.addEventListener('input', () => {
-        localStorage.setItem(id, el.value);
+
+        localStorage.setItem(
+            id,
+            el.value
+        );
+
     });
+
 });
 
-// 🔥 KOORDINAT TOKO
+/* =========================
+    ONGKIR
+========================= */
+
 const tokoLat = -0.4866;
 const tokoLng = 117.1661;
 
-// 🔥 HITUNG JARAK (HAVERSINE)
 function hitungJarak(lat1, lon1, lat2, lon2) {
+
     let R = 6371;
-    let dLat = (lat2 - lat1) * Math.PI / 180;
-    let dLon = (lon2 - lon1) * Math.PI / 180;
+
+    let dLat =
+        (lat2 - lat1) * Math.PI / 180;
+
+    let dLon =
+        (lon2 - lon1) * Math.PI / 180;
 
     let a =
         Math.sin(dLat/2) * Math.sin(dLat/2) +
         Math.cos(lat1 * Math.PI / 180) *
         Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon/2) * Math.sin(dLon/2);
+        Math.sin(dLon/2) *
+        Math.sin(dLon/2);
 
-    let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    let c =
+        2 * Math.atan2(
+            Math.sqrt(a),
+            Math.sqrt(1-a)
+        );
+
     return R * c;
+
 }
 
-// 🔥 STATE
-let currentLat = null;
-let currentLng = null;
-
-// 🔥 ONGKIR ZONASI (FINAL)
 function hitungOngkir(jarak) {
 
     if (jarak <= 1) return 0;
@@ -429,54 +695,470 @@ function hitungOngkir(jarak) {
     if (jarak <= 15) return 21000;
 
     return 25000;
+
 }
 
-// 🔥 UPDATE ONGKIR
 function updateOngkir() {
 
-    let deliveryType = document.querySelector('input[name="delivery_type"]:checked').value;
+    let deliveryType =
+        document.querySelector(
+            'input[name="delivery_type"]:checked'
+        ).value;
 
-    let harga = {{ array_sum(array_map(fn($i) => $i['harga'] * $i['qty'], session('cart', []))) }};
+    let harga =
+        {{ $subtotal }};
+
     let admin = 1000;
+
     let ongkir = 0;
 
-    if (deliveryType === 'delivery' && currentLat && currentLng) {
+    if (
+        deliveryType === 'delivery'
+        &&
+        currentLat
+        &&
+        currentLng
+    ) {
 
-        let jarak = hitungJarak(tokoLat, tokoLng, currentLat, currentLng);
+        let jarak =
+            hitungJarak(
+                tokoLat,
+                tokoLng,
+                currentLat,
+                currentLng
+            );
 
-        // 🔥 FIX: KALIBRASI AGAR MIRIP GOOGLE MAPS
         jarak = jarak * 1.5;
 
-        // 🔥 BULATKAN BIAR STABIL
-        jarak = Math.round(jarak * 10) / 10;
+        jarak =
+            Math.round(jarak * 10) / 10;
 
-        // 🔥 DEBUG (LIAT DI CONSOLE)
-        console.log("Jarak setelah kalibrasi:", jarak);
+        console.log(
+            "Jarak setelah kalibrasi:",
+            jarak
+        );
 
-        ongkir = hitungOngkir(jarak);
+        ongkir =
+            hitungOngkir(jarak);
+
     }
 
-    document.getElementById('ongkir').innerText = 'Rp ' + ongkir.toLocaleString('id-ID');
+    document.getElementById('ongkir')
+        .innerText =
+        'Rp ' +
+        ongkir.toLocaleString('id-ID');
 
-    let total = harga + ongkir + admin;
+    let total =
+        harga +
+        ongkir +
+        admin;
 
-    document.getElementById('totalAkhir').innerText = 'Rp ' + total.toLocaleString('id-ID');
+    document.getElementById('totalAkhir')
+        .innerText =
+        'Rp ' +
+        total.toLocaleString('id-ID');
 
-    document.getElementById('ongkirWrapper').style.display =
-        deliveryType === 'pickup' ? 'none' : 'flex';
+    document.getElementById('ongkirWrapper')
+        .style.display =
+        deliveryType === 'pickup'
+        ? 'none'
+        : 'flex';
 
-    document.getElementById('ongkirInput').value = ongkir;
-    document.getElementById('totalInput').value = total;
+    document.getElementById('ongkirInput')
+        .value = ongkir;
+
+    document.getElementById('totalInput')
+        .value = total;
+
 }
 
-// 🔥 LISTENER RADIO
-document.querySelectorAll('input[name="delivery_type"]').forEach(el => {
-    el.addEventListener('change', updateOngkir);
+document.querySelectorAll(
+    'input[name="delivery_type"]'
+).forEach(el => {
+
+    el.addEventListener(
+        'change',
+        updateOngkir
+    );
+
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-    updateOngkir();
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        updateOngkir();
+
 });
+
+/* =========================
+    MODAL
+========================= */
+
+function showGlobalModal(
+    icon,
+    title,
+    message
+) {
+
+    document.getElementById('modalIcon')
+        .innerHTML = icon;
+
+    document.getElementById('modalTitle')
+        .innerText = title;
+
+    document.getElementById('modalMessage')
+        .innerText = message;
+
+    document.getElementById('globalModal')
+        .classList.remove('hidden');
+
+    document.getElementById('globalModal')
+        .classList.add('flex');
+
+}
+
+function closeGlobalModal() {
+
+    document.getElementById('globalModal')
+        .classList.remove('flex');
+
+    document.getElementById('globalModal')
+        .classList.add('hidden');
+
+}
+
+</script>
+
+<script
+    type="text/javascript"
+    src="https://app.sandbox.midtrans.com/snap/snap.js"
+    data-client-key="{{ config('midtrans.client_key') }}">
+</script>
+
+<script>
+
+/* =========================
+    MIDTRANS
+========================= */
+
+let isPaying = false;
+
+const payButton =
+    document.getElementById('pay-button');
+
+function resetPayButton() {
+
+    isPaying = false;
+
+    payButton.disabled = false;
+
+    payButton.innerText =
+        'Pesan Sekarang';
+}
+
+payButton.addEventListener(
+    'click',
+    async function (e) {
+
+    e.preventDefault();
+
+    if (isPaying) {
+
+        return;
+    }
+
+    let form =
+        document.getElementById(
+            'checkout-form'
+        );
+
+    if (!form.checkValidity()) {
+
+        form.reportValidity();
+
+        return;
+    }
+
+    isPaying = true;
+
+    payButton.disabled = true;
+
+    payButton.innerText =
+        'Memproses...';
+
+    let formData =
+        new FormData(form);
+
+    try {
+
+        let response =
+            await fetch(
+                "{{ route('checkout.store') }}",
+        {
+
+            method: "POST",
+
+            headers: {
+
+                'X-CSRF-TOKEN':
+                    '{{ csrf_token() }}',
+
+                'Accept':
+                    'application/json'
+            },
+
+            body: formData
+        });
+
+        let data =
+            await response.json();
+
+        console.log(data);
+
+        if (!response.ok) {
+
+            resetPayButton();
+
+            showGlobalModal(
+                '❌',
+                'Checkout Gagal',
+                data.message ??
+                'Terjadi kesalahan'
+            );
+
+            return;
+        }
+
+        /* =========================
+            COD
+        ========================= */
+
+        if (data.cod) {
+
+            window.location.href =
+                data.redirect;
+
+            return;
+        }
+
+        /* =========================
+            SNAP TOKEN
+        ========================= */
+
+        if (!data.snap_token) {
+
+            resetPayButton();
+
+            showGlobalModal(
+                '❌',
+                'Snap Token Gagal',
+                'Snap token gagal dibuat.'
+            );
+
+            return;
+        }
+
+        /* =========================
+            MIDTRANS PAY
+        ========================= */
+
+        let paymentTimeout = setTimeout(() => {
+
+            resetPayButton();
+
+            showGlobalModal(
+                '❌',
+                'Timeout',
+                'Midtrans tidak merespon.'
+            );
+
+        }, 5000);
+
+        snap.pay(data.snap_token, {
+
+            onSuccess: async function(result) {
+
+                clearTimeout(paymentTimeout);
+
+                console.log(result);
+
+                try {
+
+                    await fetch(
+                        "{{ route('payment.success') }}",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+
+                            'Content-Type':
+                                'application/json',
+
+                            'X-CSRF-TOKEN':
+                                '{{ csrf_token() }}'
+                        },
+
+                        body: JSON.stringify({
+
+                            order_id:
+                                result.order_id,
+
+                            transaction_status:
+                                result.transaction_status,
+
+                            transaction_id:
+                                result.transaction_id
+                        })
+                    });
+
+                } catch(err) {
+
+                    console.log(err);
+                }
+
+                resetPayButton();
+
+                showGlobalModal(
+                    '✅',
+                    'Pembayaran Berhasil',
+                    'Pesanan berhasil dibayar.'
+                );
+
+                setTimeout(() => {
+
+                    window.location.href =
+                        '/customer/pesanan-saya';
+
+                }, 2000);
+
+            },
+
+            onPending: function(result) {
+
+                clearTimeout(paymentTimeout);
+
+                console.log(result);
+
+                resetPayButton();
+
+                showGlobalModal(
+                    '⏳',
+                    'Menunggu Pembayaran',
+                    'Silakan selesaikan pembayaran.'
+                );
+
+            },
+
+                onError: async function(result) {
+                
+                    clearTimeout(paymentTimeout);
+
+                console.log(result);
+
+                try {
+
+                    await fetch(
+                        "{{ route('payment.failed') }}",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+
+                            'Content-Type':
+                                'application/json',
+
+                            'X-CSRF-TOKEN':
+                                '{{ csrf_token() }}'
+                        },
+
+                        body: JSON.stringify({
+
+                            order_id:
+                                result.order_id ??
+                                null
+                        })
+                    });
+
+                } catch(err) {
+
+                    console.log(err);
+
+                }
+
+                resetPayButton();
+
+                showGlobalModal(
+                    '❌',
+                    'Pembayaran Gagal',
+                    'Transaksi gagal dilakukan.'
+                );
+
+            },
+
+            onClose: async function() {
+
+                   clearTimeout(paymentTimeout);
+
+                try {
+
+                    await fetch(
+                        "{{ route('payment.failed') }}",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+
+                            'Content-Type':
+                                'application/json',
+
+                            'X-CSRF-TOKEN':
+                                '{{ csrf_token() }}'
+                        },
+
+                        body: JSON.stringify({
+
+                            order_id: null
+                        })
+                    });
+
+                } catch(err) {
+
+                    console.log(err);
+
+                }
+
+                resetPayButton();
+
+                showGlobalModal(
+                    '⚠️',
+                    'Pembayaran Dibatalkan',
+                    'Popup pembayaran ditutup.'
+                );
+
+            }
+
+        });
+
+    } catch(error) {
+
+        console.log(error);
+
+        resetPayButton();
+
+        showGlobalModal(
+            '❌',
+            'Server Error',
+            'Terjadi kesalahan server.'
+        );
+
+    }
+
+});
+
 </script>
 
 @endsection
