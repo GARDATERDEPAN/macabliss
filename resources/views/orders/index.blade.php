@@ -221,14 +221,14 @@
 
                         @if($paymentStatus == 'pending')
 
-                            <span class="bg-yellow-100 text-yellow-700 px-4 py-1 rounded-full text-sm">
+                            <span class="bg-gray-100 text-gray-700 px-4 py-1 rounded-full text-sm">
                                 Pending
                             </span>
 
                         @elseif($paymentStatus == 'paid')
 
                             <span class="bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm">
-                                Paid
+                                Lunas
                             </span>
 
                         @elseif($paymentStatus == 'expired')
@@ -240,13 +240,13 @@
                         @elseif($paymentStatus == 'failed')
 
                             <span class="bg-red-100 text-red-700 px-4 py-1 rounded-full text-sm">
-                                Failed
+                                Gagal
                             </span>
 
                         @elseif($paymentStatus == 'cancelled')
 
-                            <span class="bg-pink-100 text-pink-700 px-4 py-1 rounded-full text-sm">
-                                Cancelled
+                            <span class="bg-red-100 text-red-700 px-4 py-1 rounded-full text-sm">
+                                Dibatalkan
                             </span>
 
                         @endif
@@ -256,37 +256,49 @@
                     <!-- STATUS ORDER -->
                     <td class="p-4 border text-center">
 
-                        @if($order->status == 'diproses')
+                        @if($order->status == 'pending')
 
-                            <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">
-                                Diproses
-                            </span>
+                        <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
+                            Pending
+                        </span>
 
-                        @elseif($order->status == 'dikemas')
+                    @elseif($order->status == 'diproses')
 
-                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
-                                Dikemas
-                            </span>
+                        <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">
+                            Diproses
+                        </span>
 
-                        @elseif($order->status == 'dikirim')
+                    @elseif($order->status == 'dikemas')
 
-                            <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
-                                Dikirim
-                            </span>
+                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                            Dikemas
+                        </span>
 
-                        @elseif($order->status == 'dibatalkan')
+                    @elseif($order->status == 'dikirim')
 
-                            <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm">
-                                Dibatalkan
-                            </span>
+                        <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
+                            Dikirim
+                        </span>
+                    
+                    @elseif($order->status == 'ambil')
 
-                        @else
+                        <span class="bg-indigo-100 text-purple-700 px-3 py-1 rounded-full text-sm">
+                            Ambil
+                        </span>
 
-                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
-                                Selesai
-                            </span>
+                    @elseif($order->status == 'dibatalkan')
 
-                        @endif
+                        <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm">
+                            Dibatalkan
+                        </span>
+
+                    @elseif($order->status == 'selesai')
+
+                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
+                            Selesai
+                        </span>
+
+                    @endif
 
                     </td>
 

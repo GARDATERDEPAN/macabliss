@@ -38,7 +38,10 @@
                 <!-- STATUS ORDER -->
                 <span class="text-xs px-3 py-1 rounded-full font-medium
 
-                    @if($order->status=='diproses')
+                    @if($order->status=='pending')
+                        bg-gray-100 text-gray-600
+
+                    @elseif($order->status=='diproses')
                         bg-yellow-100 text-yellow-600
 
                     @elseif($order->status=='dikemas')
@@ -47,11 +50,15 @@
                     @elseif($order->status=='dikirim')
                         bg-purple-100 text-purple-600
 
+                    @elseif($order->status=='ambil')
+                        bg-indigo-100 text-purple-600
+
+                    @elseif($order->status=='selesai')
+                        bg-green-100 text-green-600
+
                     @elseif($order->status=='dibatalkan')
                         bg-red-100 text-red-600
 
-                    @else
-                        bg-green-100 text-green-600
                     @endif
 
                 ">

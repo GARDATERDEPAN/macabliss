@@ -146,13 +146,13 @@
 
                         @if($p->metode == 'QRIS')
 
-                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
+                            <span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-medium">
                                 QRIS
                             </span>
 
                         @elseif($p->metode == 'COD')
 
-                            <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-medium">
+                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
                                 COD
                             </span>
 
@@ -179,12 +179,12 @@
                         @if($p->status == 'paid')
 
                             <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">
-                                Paid
+                                Lunas
                             </span>
 
                         @elseif($p->status == 'pending')
 
-                            <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs">
+                            <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs">
                                 Pending
                             </span>
 
@@ -197,13 +197,13 @@
                         @elseif($p->status == 'failed')
 
                             <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs">
-                                Failed
+                                Gagal
                             </span>
 
                         @else
 
                             <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs">
-                                Cancelled
+                                Dibatalkan
                             </span>
 
                         @endif

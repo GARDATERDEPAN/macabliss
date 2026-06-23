@@ -119,7 +119,7 @@ class PaymentController extends Controller
                 ) {
 
                     $payment->order->update([
-                        'status' => 'diproses'
+                        'status' => 'dibatalkan'
                     ]);
                 }
             }
@@ -151,11 +151,45 @@ class PaymentController extends Controller
 
             $cart = session('cart', []);
 
+            $existingOrder = Order::with('payment')
+                ->where('session_id', session()->getId())
+                ->where('status', 'pending')
+                ->latest()
+                ->first();
+
+            if (
+                $existingOrder &&
+                $existingOrder->payment &&
+                !empty($existingOrder->snap_token)
+            ) {
+
+                return response()->json([
+                    'snap_token' => $existingOrder->snap_token,
+                    'payment_id' => $existingOrder->payment->id,
+                    'existing' => true
+                ]);
+            }
+
             if (count($cart) <= 0) {
 
                 return response()->json([
                     'message' => 'Keranjang kosong'
                 ], 400);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | CEK ORDER PENDING
+            |--------------------------------------------------------------------------
+            */
+
+            if ($existingOrder && $existingOrder->payment) {
+
+                return response()->json([
+                    'snap_token' => $existingOrder->snap_token,
+                    'payment_id' => $existingOrder->payment->id,
+                    'existing' => true
+                ]);
             }
 
             /*
@@ -213,6 +247,14 @@ class PaymentController extends Controller
             |--------------------------------------------------------------------------
             */
 
+            $statusOrder = 'pending';
+
+            if ($request->payment == 'COD') {
+
+                $statusOrder = 'diproses';
+
+            }
+
             $order = Order::create([
 
                 'session_id' => session()->getId(),
@@ -243,8 +285,7 @@ class PaymentController extends Controller
                 'ongkir' =>
                     $request->ongkir,
 
-                'status' =>
-                    'diproses',
+                'status' => $statusOrder,
 
                 'metode_pengambilan' =>
                     $request->delivery_type
@@ -319,16 +360,16 @@ class PaymentController extends Controller
                     STR_PAD_LEFT
                 );
 
+            $midtransOrderId =
+                $kodeOrder . '-' . time();
+
             /*
             |--------------------------------------------------------------------------
             | PAYMENT
             |--------------------------------------------------------------------------
             */
 
-            $statusPembayaran =
-                $request->payment == 'COD'
-                    ? 'pending'
-                    : 'paid';
+            $statusPembayaran = 'pending';
 
             $payment = Payment::create([
 
@@ -344,7 +385,7 @@ class PaymentController extends Controller
 
                 'status'            => $statusPembayaran,
 
-                'payment_ref'       => $kodeOrder
+                'payment_ref'       => $midtransOrderId
 
             ]);
 
@@ -376,13 +417,13 @@ class PaymentController extends Controller
 
             $params = [
 
-                'transaction_details' => [
+            'transaction_details' => [
 
-                    'order_id' => 'MCB-' . time() . rand(100,999),
+                'order_id' => $midtransOrderId,
 
-                    'gross_amount' => (int)$total
+                'gross_amount' => (int)$total
 
-                ],
+            ],
 
                 'customer_details' => [
 
@@ -396,21 +437,29 @@ class PaymentController extends Controller
 
             $snapToken = Snap::getSnapToken($params);
 
-            session()->forget('cart');
+            $order->update([
+                'snap_token' => $snapToken,
+                'expired_at' => now()->addMinutes(15),
+                'payment_status' => 'pending'
+            ]);
 
             return response()->json([
 
-                'snap_token' =>
-                    $snapToken
+                'snap_token' => $snapToken,
+
+                'payment_id' => $payment->id
 
             ]);
 
         } catch (\Exception $e) {
 
+            \Log::error($e);
+
             return response()->json([
 
-                'message' =>
-                    $e->getMessage()
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine()
 
             ], 500);
         }
@@ -428,31 +477,34 @@ class PaymentController extends Controller
 
             $midtransOrderId = $request->order_id;
 
-            $order = Order::where('kode', $midtransOrderId)->first();
+            $payment = Payment::where(
+                'payment_ref',
+                $midtransOrderId
+            )->first();
 
-            if ($order) {
-
-                $order->update([
-                    'status' => 'diproses'
-                ]);
-
-                if ($order->payment) {
-
-                    $order->payment->update([
-                        'status' => 'paid',
-                        'payment_ref' => $midtransOrderId,
-                        'jumlah' => $order->total_harga
-                    ]);
-                }
+            if (!$payment) {
 
                 return response()->json([
-                    'success' => true
+                    'success' => false,
+                    'message' => 'Payment tidak ditemukan'
+                ], 404);
+            }
+
+            $payment->update([
+                'status' => 'paid'
+            ]);
+
+            if ($payment->order) {
+
+                $payment->order->update([
+                    'status' => 'diproses'
                 ]);
             }
 
+            session()->forget('cart');
+
             return response()->json([
-                'success' => false,
-                'message' => 'Order tidak ditemukan'
+                'success' => true
             ]);
 
         } catch (\Exception $e) {
@@ -472,6 +524,8 @@ class PaymentController extends Controller
 
     public function callback(Request $request)
     {
+        \Log::info('===== MIDTRANS CALLBACK MASUK =====');
+
         try {
 
             Config::$serverKey =
@@ -484,8 +538,12 @@ class PaymentController extends Controller
             $transaction =
                 $notif->transaction_status;
 
+                \Log::info('MIDTRANS STATUS : ' . $transaction);
+
             $orderId =
                 $notif->order_id;
+
+                \Log::info('MIDTRANS ORDER ID : ' . $orderId);
 
             /*
             |--------------------------------------------------------------------------
@@ -500,6 +558,8 @@ class PaymentController extends Controller
 
                 })
                 ->first();
+
+                \Log::info('ORDER FOUND : ' . ($order ? $order->id : 'NULL'));
 
             if (!$order) {
 
@@ -553,16 +613,14 @@ class PaymentController extends Controller
 
             elseif ($transaction == 'pending') {
 
-                if ($order->status != 'selesai') {
+                if ($order->status == 'pending') {
 
-                    $order->status =
-                        'diproses';
+                    $order->status = 'pending';
                 }
 
-                if ($payment) {
+                if ($payment && $payment->status != 'paid') {
 
-                    $payment->status =
-                        'pending';
+                    $payment->status = 'pending';
                 }
             }
 
@@ -574,16 +632,14 @@ class PaymentController extends Controller
 
             elseif ($transaction == 'expire') {
 
-                if ($order->status != 'selesai') {
+                if ($order->status == 'pending') {
 
-                    $order->status =
-                        'diproses';
+                    $order->status = 'dibatalkan';
                 }
 
                 if ($payment) {
 
-                    $payment->status =
-                        'expired';
+                    $payment->status = 'expired';
                 }
             }
 
@@ -598,16 +654,14 @@ class PaymentController extends Controller
                 $transaction == 'deny'
             ) {
 
-                if ($order->status != 'selesai') {
+                if ($order->status == 'pending') {
 
-                    $order->status =
-                        'diproses';
+                    $order->status = 'dibatalkan';
                 }
 
                 if ($payment) {
 
-                    $payment->status =
-                        'failed';
+                    $payment->status = 'failed';
                 }
             }
 
@@ -636,19 +690,29 @@ class PaymentController extends Controller
 
     public function failed(Request $request)
     {
-        $payment = Payment::latest()->first();
+        $payment = Payment::find(
+            $request->payment_id
+        );
 
-        if ($payment) {
+        if (!$payment) {
 
-            $payment->update([
-
-                'status' => 'failed'
-            ]);
-
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment tidak ditemukan'
+            ], 404);
         }
 
-        return response()->json([
+        /*
+        |--------------------------------------------------------------------------
+        | JANGAN LANGSUNG BATALKAN ORDER
+        |--------------------------------------------------------------------------
+        |
+        | Customer bisa saja menutup popup
+        | tetapi QRIS masih aktif di Midtrans.
+        |
+        */
 
+        return response()->json([
             'success' => true
         ]);
     }

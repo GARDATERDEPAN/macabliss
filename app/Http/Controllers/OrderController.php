@@ -63,9 +63,8 @@ class OrderController extends Controller
 
     public function update(Request $request, $id)
     {
-        $order = Order::findOrFail($id);
+        $order = Order::with('payment')->findOrFail($id);
 
-        // JIKA SUDAH SELESAI ATAU DIBATALKAN
         if (
             $order->status == 'selesai' ||
             $order->status == 'dibatalkan'
@@ -77,14 +76,161 @@ class OrderController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:diproses,dikemas,dikirim,selesai,dibatalkan'
+            'status' => 'required|in:pending,diproses,dikemas,dikirim,ambil,selesai,dibatalkan'
         ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI ALUR STATUS
+        |--------------------------------------------------------------------------
+        */
+
+        $allowedTransitions = [
+
+            'pending' => [
+                'diproses',
+                'dibatalkan'
+            ],
+
+            'diproses' => [
+                'dikemas',
+                'dibatalkan'
+            ],
+
+            'dikemas' => [
+                'dikirim',
+                'ambil',
+                'dibatalkan'
+            ],
+
+            'dikirim' => [
+                'selesai'
+            ],
+
+            'ambil' => [
+                'selesai'
+            ],
+
+        ];
+
+        $currentStatus =
+            $order->status;
+
+        $newStatus =
+            $request->status;
+
+        if (
+            isset($allowedTransitions[$currentStatus])
+            &&
+            !in_array(
+                $newStatus,
+                $allowedTransitions[$currentStatus]
+            )
+        )
+        {
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Perubahan status tidak sesuai alur pesanan.'
+                );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | DELIVERY TIDAK BOLEH AMBIL
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $order->metode_pengambilan == 'delivery'
+            &&
+            $request->status == 'ambil'
+        )
+        {
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Pesanan delivery tidak bisa menggunakan status ambil.'
+                );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | PICKUP TIDAK BOLEH DIKIRIM
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $order->metode_pengambilan == 'pickup'
+            &&
+            $request->status == 'dikirim'
+        )
+        {
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Pesanan pickup tidak bisa menggunakan status dikirim.'
+                );
+        }
+
+        // TIDAK BOLEH SELESAI JIKA BELUM PAID
+        if (
+            $request->status == 'selesai'
+            && $order->metode_pembayaran == 'QRIS'
+        ) {
+
+            if (
+                !$order->payment ||
+                $order->payment->status != 'paid'
+            ) {
+
+                return redirect()
+                    ->back()
+                    ->with(
+                        'error',
+                        'Pembayaran QRIS belum berhasil.'
+                    );
+            }
+        }
 
         $order->update([
             'status' => $request->status
         ]);
 
-        // JIKA SELESAI
+        /*
+        |--------------------------------------------------------------------------
+        | JIKA PESANAN DIBATALKAN
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $request->status == 'dibatalkan'
+            &&
+            $order->payment
+        ) {
+
+            $order->payment->update([
+
+                'status' => 'cancelled'
+
+            ]);
+        }
+
+        // COD otomatis lunas saat pesanan selesai
+        if (
+            $request->status == 'selesai'
+            && $order->metode_pembayaran == 'COD'
+            && $order->payment
+        ) {
+
+            $order->payment->update([
+                'status' => 'paid'
+            ]);
+        }
+
         if ($request->status == 'selesai') {
 
             $order->update([
@@ -94,7 +240,10 @@ class OrderController extends Controller
 
         return redirect()
             ->route('orders.index')
-            ->with('success', 'Status pesanan berhasil diupdate');
+            ->with(
+                'success',
+                'Status pesanan berhasil diupdate'
+            );
     }
 
     public function store(Request $request)
@@ -377,213 +526,6 @@ return response()->json([
         }
     }
 
-    public function storeAfterPayment(Request $request)
-    {
-        try {
-
-            // AMBIL CART
-            $cart = session('cart', []);
-
-            // AMBIL DATA CHECKOUT
-            $checkout =
-                session('checkout_data');
-
-            // VALIDASI
-            if (
-                empty($cart) ||
-                !$checkout
-            ) {
-
-                return response()->json([
-
-                    'success' => false,
-                    'message' => 'Checkout gagal'
-
-                ], 400);
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | HITUNG TOTAL
-            |--------------------------------------------------------------------------
-            */
-
-            $totalProduk = 0;
-
-            foreach ($cart as $item) {
-
-                $totalProduk +=
-                    $item['harga']
-                    * $item['qty'];
-            }
-
-            $ongkir =
-                $checkout['ongkir'] ?? 0;
-
-            $admin = 1000;
-
-            $total =
-                $totalProduk +
-                $ongkir +
-                $admin;
-
-            /*
-            |--------------------------------------------------------------------------
-            | CREATE ORDER
-            |--------------------------------------------------------------------------
-            */
-
-            $order = Order::create([
-
-                'kode' => null,
-
-                'nama_customer' =>
-                    $checkout['nama'],
-
-                'no_hp' =>
-                    $checkout['no_hp'],
-
-                'alamat' =>
-                    $checkout['alamat'],
-
-                'tanggal_pesan' =>
-                    now(),
-
-                'tanggal_kirim' =>
-                    $checkout['tanggal_kirim'],
-
-                'metode_pembayaran' =>
-                    'QRIS',
-
-                'ongkir' =>
-                    $ongkir,
-
-                'total_harga' =>
-                    $total,
-
-                'status' =>
-                    'diproses'
-
-            ]);
-
-            /*
-            |--------------------------------------------------------------------------
-            | GENERATE KODE
-            |--------------------------------------------------------------------------
-            */
-
-            $orderCode =
-                'M-' .
-                str_pad(
-                    $order->id,
-                    4,
-                    '0',
-                    STR_PAD_LEFT
-                );
-
-            $order->update([
-
-                'kode' => $orderCode
-
-            ]);
-
-            /*
-            |--------------------------------------------------------------------------
-            | DETAIL ORDER
-            |--------------------------------------------------------------------------
-            */
-
-            foreach ($cart as $id => $item) {
-
-                OrderDetail::create([
-
-                    'order_id' =>
-                        $order->id,
-
-                    'product_id' =>
-                        $id,
-
-                    'qty' =>
-                        $item['qty'],
-
-                    'harga' =>
-                        $item['harga']
-
-                ]);
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | PAYMENT
-            |--------------------------------------------------------------------------
-            */
-
-            Payment::create([
-
-                'order_id' =>
-                    $order->id,
-
-                'kode_pembayaran' =>
-                    'PAY-' .
-                    str_pad(
-                        $order->id,
-                        4,
-                        '0',
-                        STR_PAD_LEFT
-                    ),
-
-                'metode' =>
-                    'QRIS',
-
-                'payment_ref' =>
-                    $request->transaction_id,
-
-                'tanggal_bayar' =>
-                    now(),
-
-                'jumlah' =>
-                    $total,
-
-                'status' =>
-                    'paid',
-
-            ]);
-
-            /*
-            |--------------------------------------------------------------------------
-            | CLEAR SESSION
-            |--------------------------------------------------------------------------
-            */
-
-            session()->forget('cart');
-
-            session()->forget('checkout_data');
-
-            return response()->json([
-
-                'success' => true
-
-            ]);
-
-        } catch (\Throwable $e) {
-
-            return response()->json([
-
-                'success' => false,
-
-                'message' =>
-                    $e->getMessage(),
-
-                'file' =>
-                    $e->getFile(),
-
-                'line' =>
-                    $e->getLine()
-
-            ], 500);
-        }
-    }
-
     // OPTIONAL MANUAL BAYAR
     public function bayar($id)
     {
@@ -610,77 +552,77 @@ return response()->json([
     }
 
     public function retryPayment($id)
-{
-    $order = Order::with('payment')->findOrFail($id);
+    {
+        $order = Order::with('payment')->findOrFail($id);
 
-    // MIDTRANS
-    \Midtrans\Config::$serverKey = config('midtrans.server_key');
-    \Midtrans\Config::$isProduction = false;
-    \Midtrans\Config::$isSanitized = true;
-    \Midtrans\Config::$is3ds = true;
+        // MIDTRANS
+        \Midtrans\Config::$serverKey = config('midtrans.server_key');
+        \Midtrans\Config::$isProduction = false;
+        \Midtrans\Config::$isSanitized = true;
+        \Midtrans\Config::$is3ds = true;
 
-    // ORDER ID BARU
-    $uniqueOrderId =
-        'RETRY-' .
-        now()->timestamp .
-        '-' .
-        rand(1000, 9999);
+        // ORDER ID BARU
+        $uniqueOrderId =
+            'RETRY-' .
+            now()->timestamp .
+            '-' .
+            rand(1000, 9999);
 
-    // GENERATE TOKEN BARU
-    $params = [
+        // GENERATE TOKEN BARU
+        $params = [
 
-        'transaction_details' => [
+            'transaction_details' => [
 
-            'order_id' =>
-                $uniqueOrderId,
+                'order_id' =>
+                    $uniqueOrderId,
 
-            'gross_amount' =>
-                (int) $order->total_harga,
-        ],
+                'gross_amount' =>
+                    (int) $order->total_harga,
+            ],
 
-        'customer_details' => [
+            'customer_details' => [
 
-            'first_name' =>
-                $order->nama_customer,
+                'first_name' =>
+                    $order->nama_customer,
 
-            'phone' =>
-                $order->no_hp,
-        ],
-    ];
+                'phone' =>
+                    $order->no_hp,
+            ],
+        ];
 
-    $snapToken =
-        \Midtrans\Snap::getSnapToken($params);
+        $snapToken =
+            \Midtrans\Snap::getSnapToken($params);
 
-    // UPDATE ORDER
-    $order->update([
+        // UPDATE ORDER
+        $order->update([
 
-        'snap_token' =>
-            $snapToken,
+            'snap_token' =>
+                $snapToken,
 
-        'expired_at' =>
-            now()->addMinutes(15),
-
-        'status' =>
-            'diproses'
-    ]);
-
-    // UPDATE PAYMENT
-    if ($order->payment) {
-
-        $order->payment->update([
+            'expired_at' =>
+                now()->addMinutes(15),
 
             'status' =>
-                'pending',
+                'pending'
+        ]);
 
-            'payment_ref' =>
+        // UPDATE PAYMENT
+        if ($order->payment) {
+
+            $order->payment->update([
+
+                'status' =>
+                    'pending',
+
+                'payment_ref' =>
+                    $snapToken
+            ]);
+        }
+
+        return response()->json([
+
+            'snap_token' =>
                 $snapToken
         ]);
     }
-
-    return response()->json([
-
-        'snap_token' =>
-            $snapToken
-    ]);
-}
 }

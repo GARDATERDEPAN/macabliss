@@ -19,6 +19,9 @@ class Order extends Model
         'ongkir',
         'total_harga',
         'status',
+        'snap_token',
+        'payment_status',
+        'expired_at',
     ];
 
     // 🔥 RELASI KE DETAIL PRODUK

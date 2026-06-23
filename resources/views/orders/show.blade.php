@@ -122,49 +122,38 @@
 
                         <div class="mt-1 border rounded-xl px-4 py-3 bg-gray-50">
 
-                            @if($order->payment_status == 'paid')
+                            @php
+                                $paymentStatus = $order->payment->status ?? 'pending';
+                            @endphp
 
-                                <span class="bg-green-100 text-green-700
-                                             px-4 py-2 rounded-full text-sm font-medium">
+                            @if($paymentStatus == 'paid')
 
+                                <span class="bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
                                     Pembayaran Berhasil
-
                                 </span>
 
-                            @elseif($order->payment_status == 'pending')
+                            @elseif($paymentStatus == 'pending')
 
-                                <span class="bg-yellow-100 text-yellow-700
-                                             px-4 py-2 rounded-full text-sm font-medium">
-
+                                <span class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-full text-sm font-medium">
                                     Menunggu Pembayaran
-
                                 </span>
 
-                            @elseif($order->payment_status == 'expired')
+                            @elseif($paymentStatus == 'expired')
 
-                                <span class="bg-red-100 text-red-700
-                                             px-4 py-2 rounded-full text-sm font-medium">
-
+                                <span class="bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm font-medium">
                                     Pembayaran Kadaluarsa
-
                                 </span>
 
-                            @elseif($order->payment_status == 'failed')
+                            @elseif($paymentStatus == 'failed')
 
-                                <span class="bg-red-200 text-red-800
-                                             px-4 py-2 rounded-full text-sm font-medium">
-
+                                <span class="bg-red-200 text-red-800 px-4 py-2 rounded-full text-sm font-medium">
                                     Pembayaran Gagal
-
                                 </span>
 
                             @else
 
-                                <span class="bg-gray-100 text-gray-700
-                                             px-4 py-2 rounded-full text-sm font-medium">
-
-                                    -
-
+                                <span class="bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm font-medium">
+                                    Pembayaran Gagal
                                 </span>
 
                             @endif
@@ -399,6 +388,23 @@
 
                                     class="border px-4 py-3 rounded-xl w-56 bg-white
                                         focus:outline-none focus:ring-2 focus:ring-red-300">
+                                    
+                                    @if($order->metode_pengambilan == 'pickup')
+
+                                        <div class="hidden" id="pickup-order"></div>
+
+                                    @elseif($order->metode_pengambilan == 'delivery')
+
+                                        <div class="hidden" id="delivery-order"></div>
+
+                                    @endif
+
+                                    <option value="pending"
+                                        {{ $order->status == 'pending' ? 'selected' : '' }}>
+
+                                        Pending
+
+                                    </option>
 
                                     <option value="diproses"
                                         {{ $order->status == 'diproses' ? 'selected' : '' }}>
@@ -418,6 +424,13 @@
                                         {{ $order->status == 'dikirim' ? 'selected' : '' }}>
 
                                         Dikirim
+
+                                    </option>
+
+                                    <option value="ambil"
+                                        {{ $order->status == 'ambil' ? 'selected' : '' }}>
+
+                                        Ambil
 
                                     </option>
 
@@ -468,6 +481,82 @@
                     </div>
 
                 </div>
+
+            <script>
+
+            document.addEventListener('DOMContentLoaded', function () {
+
+                const statusSelect =
+                    document.querySelector('select[name="status"]');
+
+                if(!statusSelect) return;
+
+                const metodePengambilan =
+                    @json($order->metode_pengambilan);
+
+                const metodePembayaran =
+                    @json($order->metode_pembayaran);
+
+                /*
+                |--------------------------------------------------------------------------
+                | QRIS
+                |--------------------------------------------------------------------------
+                */
+
+                if(metodePembayaran === 'QRIS')
+                {
+                    /*
+                    QRIS boleh:
+                    pending
+                    diproses
+                    dikemas
+                    dikirim / ambil
+                    selesai
+                    dibatalkan
+                    */
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | PICKUP
+                |--------------------------------------------------------------------------
+                */
+
+                if(metodePengambilan === 'pickup')
+                {
+                    const kirimOption =
+                        statusSelect.querySelector(
+                            'option[value="dikirim"]'
+                        );
+
+                    if(kirimOption)
+                    {
+                        kirimOption.remove();
+                    }
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | DELIVERY
+                |--------------------------------------------------------------------------
+                */
+
+                if(metodePengambilan === 'delivery')
+                {
+                    const ambilOption =
+                        statusSelect.querySelector(
+                            'option[value="ambil"]'
+                        );
+
+                    if(ambilOption)
+                    {
+                        ambilOption.remove();
+                    }
+                }
+
+            });
+
+            </script>
 
             </form>
 

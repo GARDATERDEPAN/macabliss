@@ -914,6 +914,9 @@ payButton.addEventListener(
         let data =
             await response.json();
 
+        let paymentId = 
+            data.payment_id;
+
         console.log(data);
 
         if (!response.ok) {
@@ -963,17 +966,32 @@ payButton.addEventListener(
             MIDTRANS PAY
         ========================= */
 
-        let paymentTimeout = setTimeout(() => {
+        let paymentTimeout = setTimeout(async () => {
 
-            resetPayButton();
+            try {
 
-            showGlobalModal(
-                '❌',
-                'Timeout',
-                'Midtrans tidak merespon.'
-            );
+                await fetch(
+                    "{{ route('payment.failed') }}",
+                    {
+                        method: "POST",
 
-        }, 5000);
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+
+                        body: JSON.stringify({
+                            payment_id: paymentId
+                        })
+                    }
+                );
+
+            } catch(err) {
+
+                console.log(err);
+            }
+
+        }, 10000);
 
         snap.pay(data.snap_token, {
 
@@ -1076,9 +1094,8 @@ payButton.addEventListener(
 
                         body: JSON.stringify({
 
-                            order_id:
-                                result.order_id ??
-                                null
+                            payment_id: paymentId
+
                         })
                     });
 
@@ -1121,7 +1138,8 @@ payButton.addEventListener(
 
                         body: JSON.stringify({
 
-                            order_id: null
+                            payment_id: paymentId
+
                         })
                     });
 

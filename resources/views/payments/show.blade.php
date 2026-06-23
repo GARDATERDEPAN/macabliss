@@ -80,7 +80,7 @@
 
                         @if($payment->metode == 'QRIS')
 
-                            <span class="bg-blue-100 text-blue-700
+                            <span class="bg-orange-100 text-orange-700
                                          px-4 py-2 rounded-full text-sm font-medium">
 
                                 QRIS
@@ -89,7 +89,7 @@
 
                         @elseif($payment->metode == 'COD')
 
-                            <span class="bg-gray-100 text-gray-700
+                            <span class="bg-blue-100 text-blue-700
                                          px-4 py-2 rounded-full text-sm font-medium">
 
                                 COD
