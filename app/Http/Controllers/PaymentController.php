@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Midtrans\Notification;
 use Midtrans\Config;
 use Midtrans\Snap;
+use App\Models\Ongkir;
 use App\Models\Order;
 use App\Models\OrderDetail;
 
@@ -236,9 +237,32 @@ class PaymentController extends Controller
                     $item['qty'];
             }
 
+            $ongkir = 0;
+
+            if ($request->delivery_type == 'delivery') {
+
+                $jarak = $request->jarak ?? 0;
+
+                $ongkirData = Ongkir::where(
+                        'jarak_min',
+                        '<=',
+                        $jarak
+                    )
+                    ->where(
+                        'jarak_max',
+                        '>=',
+                        $jarak
+                    )
+                    ->first();
+
+                $ongkir = $ongkirData
+                    ? $ongkirData->tarif
+                    : 0;
+            }
+
             $total =
                 $subtotal +
-                $request->ongkir +
+                $ongkir +
                 1000;
 
             /*
@@ -283,7 +307,7 @@ class PaymentController extends Controller
                     $total,
 
                 'ongkir' =>
-                    $request->ongkir,
+                    $ongkir,
 
                 'status' => $statusOrder,
 

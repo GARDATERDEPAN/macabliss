@@ -14,8 +14,14 @@ class CustomerController extends Controller
         // KATEGORI + PRODUK
         $categories = Category::with(['products' => function ($query) {
             $query->where('status', 'active')
-                  ->latest();
+                ->latest();
         }])->get();
+
+        // GALERI PRODUK
+        $galeries = Product::where('status', 'active')
+            ->latest()
+            ->take(6)
+            ->get();
 
         if ($id) {
 
@@ -33,7 +39,8 @@ class CustomerController extends Controller
 
         return view('customer.beranda', compact(
             'products',
-            'categories'
+            'categories',
+            'galeries'
         ));
     }
 

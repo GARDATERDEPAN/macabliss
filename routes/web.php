@@ -11,6 +11,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductRatingController;
+use App\Http\Controllers\OngkirController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +20,7 @@ use App\Http\Controllers\ProductRatingController;
 */
 
 // HALAMAN AWAL
-Route::get('/', [CustomerController::class, 'tentang'])
+Route::get('/', [CustomerController::class, 'beranda'])
     ->name('home');
 
 // LOGIN ADMIN CUSTOM
@@ -163,6 +164,17 @@ Route::post('/midtrans/callback',
 
 /*
 |--------------------------------------------------------------------------
+| ONGKIR
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/get-ongkir/{jarak}',
+    [OngkirController::class, 'getOngkir']
+)->name('get.ongkir');
+
+/*
+|--------------------------------------------------------------------------
 | ADMIN
 |--------------------------------------------------------------------------
 */
@@ -213,6 +225,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // PAYMENT
     Route::resource('payments',
         PaymentController::class);
+    
+    // ONGKIR
+    Route::resource('ongkir', OngkirController::class);
 });
 
 

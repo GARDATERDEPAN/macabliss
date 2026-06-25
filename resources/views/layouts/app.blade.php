@@ -55,6 +55,15 @@
                 Kategori
             </a>
 
+            <a href="/ongkir" 
+            class="flex items-center gap-2 px-4 py-2 rounded-lg 
+            {{ request()->is('ongkir*') ? 'bg-red-300 text-red-600 font-semibold' : 'hover:bg-red-100' }}">
+                
+                <i data-lucide="route" class="w-4 h-4"></i>
+
+                Ongkir
+            </a>
+
             <a href="/orders" 
                class="flex items-center gap-2 px-4 py-2 rounded-lg 
                {{ request()->is('orders*') ? 'bg-red-300 text-red-600 font-semibold' : 'hover:bg-red-100' }}">

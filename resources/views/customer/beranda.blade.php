@@ -5,18 +5,148 @@
 <div class="max-w-7xl mx-auto px-4 py-8">
 
     <!-- HEADER -->
-    <div class="flex justify-between items-center mb-10">
+    {{-- <div class="flex justify-between items-center mb-10">
 
         <div>
-            <h1 class="text-4xl font-bold text-gray-900">
+            <h1 class="text-3xl font-bold text-gray-900">
                 Macabliss
             </h1>
         </div>
 
+    </div> --}}
+
+    <!-- HERO CARD -->
+    <div class="relative bg-gradient-to-r from-red-400 to-red-500 rounded-3xl shadow-xl p-6 md:p-8 mb-8 text-white">
+
+        <div class="max-w-3xl">
+
+            <h1 class="text-3xl md:text-3xl font-bold mb-4">
+                Selamat Datang di Macabliss!
+            </h1>
+
+            <p class="text-sm md:text-lg leading-relaxed opacity-95">
+                Macabliss menyediakan berbagai pilihan makanan
+                ringan yang dapat dipesan secara online dengan
+                mudah. Pilih produk favorit Anda dan lakukan 
+                pemesanan langsung melalui website.
+            </p>
+
+        </div>
+
+        <!-- FRESH LABEL -->
+        <div class="mt-8 flex justify-end">
+
+            <div class="inline-flex items-center gap-3 bg-white/10 backdrop-blur px-4 py-2 rounded-full border border-white/20">
+
+                <span class="text-lg">
+                    ✨
+                </span>
+
+                <span class="font-semibold">
+                    Fresh From The Oven
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- CARA PEMESANAN -->
+    {{-- <div class="mb-10">
+
+        <h2 class="text-2xl font-bold text-gray-800 mb-5">
+            Cara Pemesanan
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+            <div class="bg-white rounded-2xl shadow-md p-5 hover:shadow-xl transition">
+
+                <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center text-2xl mb-4">
+                    1️⃣
+                </div>
+
+                <h3 class="font-bold text-lg mb-2">
+                    Pilih Kategori
+                </h3>
+
+                <p class="text-sm text-gray-500">
+                    Pilih kategori produk yang ingin dipesan.
+                </p>
+
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-md p-5 hover:shadow-xl transition">
+
+                <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center text-2xl mb-4">
+                    2️⃣
+                </div>
+
+                <h3 class="font-bold text-lg mb-2">
+                    Tambah Keranjang
+                </h3>
+
+                <p class="text-sm text-gray-500">
+                    Tambahkan produk ke keranjang belanja.
+                </p>
+
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-md p-5 hover:shadow-xl transition">
+
+                <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center text-2xl mb-4">
+                    3️⃣
+                </div>
+
+                <h3 class="font-bold text-lg mb-2">
+                    Isi Data Pesanan
+                </h3>
+
+                <p class="text-sm text-gray-500">
+                    Tentukan metode pengambilan atau pengiriman.
+                </p>
+
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-md p-5 hover:shadow-xl transition">
+
+                <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center text-2xl mb-4">
+                    4️⃣
+                </div>
+
+                <h3 class="font-bold text-lg mb-2">
+                    Selesaikan Pembayaran
+                </h3>
+
+                <p class="text-sm text-gray-500">
+                    Bayar melalui QRIS atau COD dan tunggu pesanan diproses.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div> --}}
+
+    <!-- JUDUL KATEGORI -->
+    <div class="mb-6">
+
+        <h2 class="text-2xl font-bold text-gray-800">
+            Kategori Produk
+        </h2>
+
+        <p class="text-gray-500 mt-2">
+            Pilih salah satu kategori untuk melihat produk yang tersedia.
+        </p>
+
     </div>
 
     <!-- KATEGORI -->
-    <div class="grid grid-cols-2 gap-10">
+    @foreach ($categories as $category)
+    @endforeach
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-10">
 
         @foreach ($categories as $category)
 
@@ -28,13 +158,13 @@
                 @if($category->gambar && file_exists(public_path('images/' . $category->gambar)))
 
                     <img src="{{ asset('images/' . $category->gambar) }}"
-                         class="w-44 h-44 rounded-full
+                         class="w-28 h-28 md:w-40 md:h-40 lg:w-44 lg:h-44 rounded-full
                                 object-cover border-[6px]
                                 border-red-100 shadow-xl">
 
                 @else
 
-                    <div class="w-44 h-44 rounded-full
+                    <div class="w-28 h-28 md:w-40 md:h-40 lg:w-44 lg:h-44 rounded-full
                                 bg-gray-200 border-[6px]
                                 border-red-100 shadow-xl
                                 flex items-center justify-center
@@ -56,6 +186,94 @@
             </button>
 
         @endforeach
+
+    </div>
+
+    <!-- GALERI PRODUK -->
+    <div class="mt-16 mb-10">
+
+        <div class="mb-6">
+
+            <h2 class="text-2xl font-bold text-gray-800">
+                Menu Produk
+            </h2>
+
+            <p class="text-gray-500 mt-2">
+                Beberapa produk yang tersedia di Macabliss.
+            </p>
+
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
+
+            @foreach ($galeries as $item)
+
+                <div
+                    class="group overflow-hidden rounded-3xl shadow-lg bg-white">
+
+                    @if($item->gambar && file_exists(public_path('storage/' . $item->gambar)))
+
+                        <img
+                            src="{{ asset('storage/' . $item->gambar) }}"
+                            class="w-full h-52 object-cover
+                                group-hover:scale-110
+                                transition duration-500">
+
+                    @else
+
+                        <div
+                            class="w-full h-52
+                                bg-gray-200
+                                flex items-center
+                                justify-center
+                                text-gray-500">
+
+                            No Image
+
+                        </div>
+
+                    @endif
+
+                    <div class="p-4">
+
+    <div class="flex justify-between items-start gap-3">
+
+        <div>
+
+            <h3 class="font-bold text-lg text-gray-800">
+                {{ $item->nama_produk }}
+            </h3>
+
+            <p class="text-red-500 font-semibold mt-1">
+                Rp {{ number_format($item->harga,0,',','.') }}
+            </p>
+
+        </div>
+
+        <button
+            onclick="addItem({{ $item->id }}, {{ $item->harga }})"
+            class="bg-red-400 hover:bg-red-500
+                   text-white w-10 h-10
+                   rounded-full
+                   shadow-md
+                   flex items-center
+                   justify-center
+                   transition
+                   hover:scale-110">
+
+            +
+
+        </button>
+
+    </div>
+
+</div>
+
+                </div>
+
+            @endforeach
+
+        </div>
 
     </div>
 
@@ -202,6 +420,103 @@
                 rounded-2xl shadow-xl">
 
 </div>
+
+<!-- FOOTER -->
+<footer class="bg-white border-t mt-1 rounded-t-3xl overflow-hidden">
+
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-8">
+
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+
+            <!-- INFO -->
+            <div>
+
+                <h3 class="text-2xl font-bold text-red-500">
+                    Macabliss
+                </h3>
+
+
+            </div>
+
+            <!-- SOSIAL MEDIA -->
+            <div class="flex items-center gap-8">
+
+                <!-- INSTAGRAM -->
+                <a
+                    href="https://instagram.com/macabliss"
+                    target="_blank"
+                    class="flex items-center gap-2
+                           text-gray-700
+                           hover:text-pink-500
+                           transition">
+
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="w-6 h-6"
+                         fill="none"
+                         viewBox="0 0 24 24"
+                         stroke="currentColor">
+
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M16 2H8a6 6 0 00-6 6v8a6 6 0 006 6h8a6 6 0 006-6V8a6 6 0 00-6-6z"/>
+
+                        <circle cx="12"
+                                cy="12"
+                                r="3"/>
+
+                        <circle cx="17.5"
+                                cy="6.5"
+                                r="1"/>
+
+                    </svg>
+
+                    <span>
+                        @macabliss
+                    </span>
+
+                </a>
+
+                <!-- WHATSAPP -->
+                <a
+                    href="https://wa.me/6282152285028"
+                    target="_blank"
+                    class="flex items-center gap-2
+                           text-gray-700
+                           hover:text-green-500
+                           transition">
+
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="w-6 h-6"
+                         fill="currentColor"
+                         viewBox="0 0 24 24">
+
+                        <path d="M12.04 2C6.56 2 2.1 6.46 2.1 11.94c0 1.76.46 3.47 1.33 4.98L2 22l5.23-1.37a9.88 9.88 0 004.81 1.23h.01c5.48 0 9.94-4.46 9.94-9.94C22 6.46 17.52 2 12.04 2zm0 18.06c-1.49 0-2.94-.4-4.2-1.15l-.3-.18-3.1.81.83-3.02-.2-.31a8.11 8.11 0 01-1.26-4.27c0-4.49 3.65-8.14 8.14-8.14 4.48 0 8.13 3.65 8.13 8.14s-3.65 8.12-8.14 8.12zm4.46-6.09c-.24-.12-1.4-.69-1.62-.77-.22-.08-.38-.12-.54.12-.16.24-.62.77-.76.93-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.22-.72-.64-1.21-1.43-1.35-1.67-.14-.24-.02-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.31-.74-1.79-.2-.48-.4-.42-.54-.42h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.7 2.6 4.12 3.65.58.25 1.03.4 1.38.51.58.18 1.1.15 1.52.09.46-.07 1.4-.57 1.6-1.13.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28z"/>
+
+                    </svg>
+
+                    <span>
+                        +62 821-5228-5028
+                    </span>
+
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- COPYRIGHT -->
+        <div class="border-t mt-6 pt-4 text-center mx-0">
+
+            <p class="text-gray-400 text-sm">
+                © {{ date('Y') }} Macabliss. All Rights Reserved.
+            </p>
+
+        </div>
+
+    </div>
+
+</footer>
 
 <style>
 

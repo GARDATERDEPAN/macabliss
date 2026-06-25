@@ -29,6 +29,7 @@
     @csrf
 
     <input type="hidden" name="ongkir" id="ongkirInput">
+    <input type="hidden" name="jarak" id="jarakInput">
     <input type="hidden" name="total_harga" id="totalInput">
 
     <div class="bg-white rounded-xl shadow border p-6 space-y-6">
@@ -685,20 +686,7 @@ function hitungJarak(lat1, lon1, lat2, lon2) {
 
 }
 
-function hitungOngkir(jarak) {
-
-    if (jarak <= 1) return 0;
-    if (jarak <= 3) return 5000;
-    if (jarak <= 5) return 9000;
-    if (jarak <= 8) return 13000;
-    if (jarak <= 12) return 17000;
-    if (jarak <= 15) return 21000;
-
-    return 25000;
-
-}
-
-function updateOngkir() {
+async function updateOngkir() {
 
     let deliveryType =
         document.querySelector(
@@ -711,6 +699,10 @@ function updateOngkir() {
     let admin = 1000;
 
     let ongkir = 0;
+
+        document.getElementById(
+        'jarakInput'
+    ).value = 0;
 
     if (
         deliveryType === 'delivery'
@@ -733,14 +725,24 @@ function updateOngkir() {
         jarak =
             Math.round(jarak * 10) / 10;
 
+        document.getElementById(
+            'jarakInput'
+        ).value = jarak;
+
         console.log(
             "Jarak setelah kalibrasi:",
             jarak
         );
 
-        ongkir =
-            hitungOngkir(jarak);
+        let response =
+            await fetch(
+                `/get-ongkir/${jarak}`
+            );
 
+        let data =
+            await response.json();
+
+        ongkir = data.tarif;
     }
 
     document.getElementById('ongkir')
