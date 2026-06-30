@@ -36,7 +36,9 @@
 
         <div class="space-y-4">
 
+            <!-- NAMA -->
             <div>
+
                 <label class="text-sm">
                     Nama
                     <span class="text-red-500">*</span>
@@ -46,10 +48,15 @@
                     type="text"
                     name="nama"
                     required
-                    class="w-full border rounded-lg px-3 py-2">
+                    value="{{ Auth::guard('customer')->user()->name }}"
+                    readonly
+                    class="w-full border rounded-lg px-3 py-2 bg-gray-100">
+
             </div>
 
+            <!-- NO HP -->
             <div>
+
                 <label class="text-sm">
                     No. Handphone
                     <span class="text-red-500">*</span>
@@ -59,7 +66,10 @@
                     type="text"
                     name="no_hp"
                     required
-                    class="w-full border rounded-lg px-3 py-2">
+                    value="{{ Auth::guard('customer')->user()->phone }}"
+                    readonly
+                    class="w-full border rounded-lg px-3 py-2 bg-gray-100">
+
             </div>
 
             <!-- ALAMAT -->
@@ -160,6 +170,14 @@
                 </label>
 
             </div>
+
+            <p class="text-xs text-gray-500 mt-2">
+                * COD hanya berlaku untuk transaksi maksimal
+                <span class="font-semibold text-red-500">
+                    Rp100.000
+                </span>.
+                Pesanan di atas Rp100.000 wajib menggunakan QRIS.
+            </p>
 
         </div>
 
@@ -629,7 +647,7 @@ inputTanggal.min = `${yyyy}-${mm}-${dd}`;
     LOCAL STORAGE
 ========================= */
 
-['nama','no_hp','alamat'].forEach(id => {
+['alamat'].forEach(id => {
 
     const el =
         document.querySelector(`[name=${id}]`);
@@ -659,30 +677,43 @@ inputTanggal.min = `${yyyy}-${mm}-${dd}`;
 const tokoLat = -0.4866;
 const tokoLng = 117.1661;
 
-function hitungJarak(lat1, lon1, lat2, lon2) {
+async function hitungJarakRute(
+    lat1,
+    lng1,
+    lat2,
+    lng2
+){
 
-    let R = 6371;
+    try{
 
-    let dLat =
-        (lat2 - lat1) * Math.PI / 180;
-
-    let dLon =
-        (lon2 - lon1) * Math.PI / 180;
-
-    let a =
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(lat1 * Math.PI / 180) *
-        Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon/2) *
-        Math.sin(dLon/2);
-
-    let c =
-        2 * Math.atan2(
-            Math.sqrt(a),
-            Math.sqrt(1-a)
+        let response = await fetch(
+            `https://router.project-osrm.org/route/v1/driving/${lng1},${lat1};${lng2},${lat2}?overview=false`
         );
 
-    return R * c;
+        let data = await response.json();
+
+        if(
+            data.routes &&
+            data.routes.length > 0
+        ){
+
+            // meter -> km
+            return (
+                data.routes[0].distance
+                / 1000
+            );
+
+        }
+
+        return 0;
+
+    }catch(err){
+
+        console.log(err);
+
+        return 0;
+
+    }
 
 }
 
@@ -713,14 +744,12 @@ async function updateOngkir() {
     ) {
 
         let jarak =
-            hitungJarak(
+            await hitungJarakRute(
                 tokoLat,
                 tokoLng,
                 currentLat,
                 currentLng
             );
-
-        jarak = jarak * 1.5;
 
         jarak =
             Math.round(jarak * 10) / 10;

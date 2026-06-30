@@ -82,8 +82,8 @@
 
                         @if($category->gambar)
 
-                            <img src="{{ asset('images/' . $category->gambar) }}"
-                                 class="w-16 h-16 object-cover rounded-full mx-auto border">
+                            <img src="{{ asset('storage/' . $category->gambar) }}"
+                                class="w-16 h-16 object-cover rounded-full mx-auto border">
 
                         @else
 

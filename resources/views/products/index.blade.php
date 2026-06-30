@@ -66,7 +66,7 @@
 
                     <!-- GAMBAR -->
                     <td class="p-4 border text-center">
-                       @if($product->gambar && file_exists(public_path('storage/' . $product->gambar)))
+                       @if($product->gambar)
                             <img src="{{ asset('storage/' . $product->gambar) }}" 
                                 class="w-16 h-16 object-cover rounded mx-auto">
                         @else

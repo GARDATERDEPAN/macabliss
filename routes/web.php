@@ -12,18 +12,19 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductRatingController;
 use App\Http\Controllers\OngkirController;
+use App\Http\Controllers\CustomerAuthController;
+use App\Http\Controllers\ChatController;
 
 /*
 |--------------------------------------------------------------------------
-| PUBLIC (CUSTOMER - TANPA LOGIN)
+| PUBLIC
 |--------------------------------------------------------------------------
 */
 
 // HALAMAN AWAL
-Route::get('/', [CustomerController::class, 'beranda'])
-    ->name('home');
+Route::redirect('/', '/customer/login');
 
-// LOGIN ADMIN CUSTOM
+// LOGIN ADMIN & KASIR
 Route::get('/login', function () {
 
     return view('welcome');
@@ -33,56 +34,102 @@ Route::get('/login', function () {
 
 /*
 |--------------------------------------------------------------------------
+| CUSTOMER AUTH
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('guest:customer')->group(function () {
+
+    Route::get(
+        '/customer/login',
+        [CustomerAuthController::class, 'showLogin']
+    )->name('customer.showLogin');
+
+    Route::post(
+        '/customer/login',
+        [CustomerAuthController::class, 'login']
+    )->name('customer.login');
+
+});
+
+Route::middleware('customer')->group(function () {
+
+    Route::post(
+        '/customer/logout',
+        [CustomerAuthController::class, 'logout']
+    )->name('customer.logout');
+
+});
+
+
+/*
+|--------------------------------------------------------------------------
 | CUSTOMER
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('customer')->group(function () {
+Route::middleware(['customer'])
+    ->prefix('customer')
+    ->group(function () {
 
-    // BERANDA
-    Route::get('/beranda/{id?}',
-        [CustomerController::class, 'beranda'])
-        ->name('customer.beranda');
+        // BERANDA
+        Route::get(
+            '/beranda/{id?}',
+            [CustomerController::class, 'beranda']
+        )->name('customer.beranda');
 
-    // KERANJANG
-    Route::get('/pesanan',
-        [CartController::class, 'index'])
-        ->name('customer.pesanan');
+        // KERANJANG
+        Route::get(
+            '/pesanan',
+            [CartController::class, 'index']
+        )->name('customer.pesanan');
 
-    // PEMBAYARAN
-    Route::get('/pembayaran',
-        [CustomerController::class, 'pembayaran'])
-        ->name('customer.pembayaran');
+        // PEMBAYARAN
+        Route::get(
+            '/pembayaran',
+            [CustomerController::class, 'pembayaran']
+        )->name('customer.pembayaran');
 
-    // RIWAYAT
-    Route::get('/pesanan-saya',
-        [CustomerController::class, 'pesananSaya'])
-        ->name('customer.pesananSaya');
+        // RIWAYAT
+        Route::get(
+            '/pesanan-saya',
+            [CustomerController::class, 'pesananSaya']
+        )->name('customer.pesananSaya');
 
-    // DETAIL
-    Route::get('/pesanan/{id}',
-        [CustomerController::class, 'detailPesanan'])
-        ->name('customer.detailPesanan');
+        // DETAIL PESANAN
+        Route::get(
+            '/pesanan/{id}',
+            [CustomerController::class, 'detailPesanan']
+        )->name('customer.detailPesanan');
 
-    // TENTANG
-    Route::get('/tentang-kami',
-        [CustomerController::class, 'tentang'])
-        ->name('customer.tentang');
+        // ADD TO CART
+        Route::post(
+            '/cart/add/{id}',
+            [CustomerController::class, 'addToCart']
+        )->name('customer.cart.add');
 
-    // ADD TO CART
-    Route::post('/cart/add/{id}',
-        [CustomerController::class, 'addToCart'])
-        ->name('customer.cart.add');
+        // RATING
+        Route::post(
+            '/rating',
+            [ProductRatingController::class, 'store']
+        )->name('rating.store');
 
-    /*
-    |--------------------------------------------------------------------------
-    | PRODUCT RATING
-    |--------------------------------------------------------------------------
-    */
+        // CHAT
+        Route::get(
+            '/chat',
+            [ChatController::class, 'index']
+        )->name('customer.chat');
 
-    Route::post('/rating',
-        [ProductRatingController::class, 'store'])
-        ->name('rating.store');
+        Route::post(
+            '/chat/send',
+            [ChatController::class, 'send']
+        )->name('customer.chat.send');
+
+        Route::get(
+            '/chat/fetch',
+            [ChatController::class, 'fetch']
+        )->name('customer.chat.fetch');
+
 });
 
 
@@ -92,32 +139,34 @@ Route::prefix('customer')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-// ADD CART
-Route::post('/cart/add',
-    [CartController::class, 'add'])
-    ->name('cart.add');
+Route::middleware('customer')->group(function () {
 
-// UPDATE CART
-Route::post('/cart/update',
-    [CartController::class, 'update'])
-    ->name('cart.update');
+    Route::post(
+        '/cart/add',
+        [CartController::class, 'add']
+    )->name('cart.add');
 
-// REMOVE CART
-Route::post('/cart/remove',
-    [CartController::class, 'remove'])
-    ->name('cart.remove');
+    Route::post(
+        '/cart/update',
+        [CartController::class, 'update']
+    )->name('cart.update');
 
-// CLEAR CART
-Route::post('/clear-cart', function () {
+    Route::post(
+        '/cart/remove',
+        [CartController::class, 'remove']
+    )->name('cart.remove');
 
-    session()->forget('cart');
+    Route::post('/clear-cart', function () {
 
-    return response()->json([
-        'success' => true
-    ]);
+        session()->forget('cart');
 
-})->name('cart.clear');
+        return response()->json([
+            'success' => true
+        ]);
 
+    })->name('cart.clear');
+
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -125,21 +174,24 @@ Route::post('/clear-cart', function () {
 |--------------------------------------------------------------------------
 */
 
-// CHECKOUT
-Route::post('/checkout',
-    [PaymentController::class, 'checkout'])
-    ->name('checkout.store');
+Route::middleware('customer')->group(function () {
 
-// BAYAR MANUAL
-Route::post('/bayar/{id}',
-    [OrderController::class, 'bayar'])
-    ->name('order.bayar');
+    Route::post(
+        '/checkout',
+        [PaymentController::class, 'checkout']
+    )->name('checkout.store');
 
-// RETRY PAYMENT
-Route::post('/retry-payment/{id}',
-    [OrderController::class, 'retryPayment'])
-    ->name('retry.payment');
+    Route::post(
+        '/bayar/{id}',
+        [OrderController::class, 'bayar']
+    )->name('order.bayar');
 
+    Route::post(
+        '/retry-payment/{id}',
+        [OrderController::class, 'retryPayment']
+    )->name('retry.payment');
+
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -147,20 +199,21 @@ Route::post('/retry-payment/{id}',
 |--------------------------------------------------------------------------
 */
 
-// SUCCESS PAYMENT
-Route::post('/payment-success',
-    [PaymentController::class, 'paymentSuccess'])
-    ->name('payment.success');
+Route::post(
+    '/payment-success',
+    [PaymentController::class, 'paymentSuccess']
+)->name('payment.success');
 
 Route::post(
     '/payment/failed',
-    [App\Http\Controllers\PaymentController::class, 'failed']
+    [PaymentController::class, 'failed']
 )->name('payment.failed');
 
-// MIDTRANS CALLBACK
-Route::post('/midtrans/callback',
-    [PaymentController::class, 'callback'])
-    ->name('midtrans.callback');
+Route::post(
+    '/midtrans/callback',
+    [PaymentController::class, 'callback']
+)->name('midtrans.callback');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -173,61 +226,117 @@ Route::get(
     [OngkirController::class, 'getOngkir']
 )->name('get.ongkir');
 
+
+/*
+|--------------------------------------------------------------------------
+| PROFILE (ADMIN & KASIR)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:admin,kasir'])->group(function () {
+
+    Route::get(
+        '/profile',
+        [ProfileController::class, 'edit']
+    )->name('profile.edit');
+
+    Route::patch(
+        '/profile',
+        [ProfileController::class, 'update']
+    )->name('profile.update');
+
+    Route::delete(
+        '/profile',
+        [ProfileController::class, 'destroy']
+    )->name('profile.destroy');
+
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| CHAT ADMIN & KASIR
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:admin,kasir'])->group(function () {
+
+    // LIST CUSTOMER CHAT
+    Route::get(
+        '/chat',
+        [ChatController::class, 'adminIndex']
+    )->name('admin.chat');
+
+    // DETAIL CHAT CUSTOMER
+    Route::get(
+        '/chat/{customerId}',
+        [ChatController::class, 'adminShow']
+    )->name('admin.chat.show');
+
+    // KIRIM PESAN ADMIN/KASIR
+    Route::post(
+        '/chat/{customerId}',
+        [ChatController::class, 'adminSend']
+    )->name('admin.chat.send');
+
+    // AUTO REFRESH CHAT
+    Route::get(
+        '/chat/{customerId}/fetch',
+        [ChatController::class, 'adminFetch']
+    )->name('chat.fetch');
+
+});
+
+
 /*
 |--------------------------------------------------------------------------
 | ADMIN
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
 
-    // DASHBOARD
-    Route::get('/dashboard',
-        [DashboardController::class, 'index'])
-        ->name('dashboard');
+    Route::get(
+        '/dashboard',
+        [DashboardController::class, 'index']
+    )->name('dashboard');
 
-    /*
-    |--------------------------------------------------------------------------
-    | PROFILE
-    |--------------------------------------------------------------------------
-    */
+    Route::resource(
+        'products',
+        ProductController::class
+    );
 
-    Route::get('/profile',
-        [ProfileController::class, 'edit'])
-        ->name('profile.edit');
+    Route::resource(
+        'categories',
+        CategoryController::class
+    );
 
-    Route::patch('/profile',
-        [ProfileController::class, 'update'])
-        ->name('profile.update');
+    Route::resource(
+        'ongkir',
+        OngkirController::class
+    );
 
-    Route::delete('/profile',
-        [ProfileController::class, 'destroy'])
-        ->name('profile.destroy');
+});
 
-    /*
-    |--------------------------------------------------------------------------
-    | CRUD ADMIN
-    |--------------------------------------------------------------------------
-    */
 
-    // PRODUCT
-    Route::resource('products',
-        ProductController::class);
+/*
+|--------------------------------------------------------------------------
+| ADMIN & KASIR
+|--------------------------------------------------------------------------
+*/
 
-    // CATEGORY
-    Route::resource('categories',
-        CategoryController::class);
+Route::middleware(['auth', 'role:admin,kasir'])->group(function () {
 
-    // ORDER
-    Route::resource('orders',
-        OrderController::class);
+    Route::resource(
+        'orders',
+        OrderController::class
+    );
 
-    // PAYMENT
-    Route::resource('payments',
-        PaymentController::class);
-    
-    // ONGKIR
-    Route::resource('ongkir', OngkirController::class);
+    Route::resource(
+        'payments',
+        PaymentController::class
+    );
+
 });
 
 

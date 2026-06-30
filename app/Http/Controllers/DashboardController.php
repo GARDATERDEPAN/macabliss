@@ -5,44 +5,164 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Payment;
+use App\Models\User;
+use App\Models\OrderDetail;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+        /*
+        |--------------------------------------------------------------------------
+        | RINGKASAN
+        |--------------------------------------------------------------------------
+        */
+
         $totalProduk = Product::count();
 
         $totalPesanan = Order::count();
 
-        $paymentLunas = Payment::where('status', 'paid')->count();
+        $totalCustomer = User::where(
+            'role',
+            'customer'
+        )->count();
 
-        $paymentPending = Payment::where('status', 'pending')->count();
+        $totalPendapatan = Payment::where(
+            'status',
+            'paid'
+        )->sum('jumlah');
 
-        $totalPendapatan = Payment::where('status', 'paid')
-                            ->sum('jumlah');
 
-        // PESANAN DIPROSES
-        $pesananDiproses = Order::where('status', 'diproses')->count();
+        /*
+        |--------------------------------------------------------------------------
+        | PESANAN TERBARU
+        |--------------------------------------------------------------------------
+        */
 
-        // PESANAN SELESAI
-        $pesananSelesai = Order::where('status', 'selesai')->count();
+        $latestOrders = Order::with([
+                'user',
+                'details.product'
+            ])
+            ->latest()
+            ->take(3)
+            ->get();
 
-        // PESANAN TERBARU
-        $latestOrders = Order::latest()->take(5)->get();
 
-        // PAYMENT TERBARU
-        $latestPayments = Payment::latest()->take(5)->get();
+        /*
+        |--------------------------------------------------------------------------
+        | PEMBAYARAN TERBARU
+        |--------------------------------------------------------------------------
+        */
 
-        return view('dashboard', compact(
-            'totalProduk',
-            'totalPesanan',
-            'paymentLunas',
-            'paymentPending',
-            'totalPendapatan',
-            'pesananDiproses',
-            'pesananSelesai',
-            'latestOrders',
-            'latestPayments'
-        ));
+        $latestPayments = Payment::with([
+                'order.user'
+            ])
+            ->latest()
+            ->take(3)
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BEST SELLER
+        |--------------------------------------------------------------------------
+        */
+
+        $bestProducts = OrderDetail::select(
+                'product_id',
+                DB::raw('SUM(qty) as total_terjual')
+            )
+            ->with('product')
+            ->groupBy('product_id')
+            ->orderByDesc('total_terjual')
+            ->take(4)
+            ->get()
+            ->map(function ($item) {
+
+                return (object) [
+
+                    'nama_produk' => $item->product->nama_produk ?? '-',
+
+                    'total_terjual' => $item->total_terjual
+
+                ];
+            });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DATA BULAN
+        |--------------------------------------------------------------------------
+        */
+
+        $months = [
+
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'Mei',
+            'Jun',
+            'Jul',
+            'Agu',
+            'Sep',
+            'Okt',
+            'Nov',
+            'Des'
+
+        ];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CHART PENJUALAN
+        |--------------------------------------------------------------------------
+        */
+
+        $monthlySales = [];
+
+        for ($i = 1; $i <= 12; $i++) {
+
+            $monthlySales[] = Payment::where(
+                    'status',
+                    'paid'
+                )
+                ->whereMonth(
+                    'created_at',
+                    $i
+                )
+                ->whereYear(
+                    'created_at',
+                    now()->year
+                )
+                ->sum('jumlah');
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN VIEW
+        |--------------------------------------------------------------------------
+        */
+
+        return view(
+            'dashboard',
+            compact(
+
+                'totalProduk',
+                'totalPesanan',
+                'totalCustomer',
+                'totalPendapatan',
+
+                'latestOrders',
+                'latestPayments',
+
+                'bestProducts',
+
+                'months',
+                'monthlySales'
+            )
+        );
     }
 }

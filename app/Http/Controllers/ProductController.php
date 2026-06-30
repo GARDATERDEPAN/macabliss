@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 class ProductController extends Controller
 {
@@ -56,15 +57,27 @@ class ProductController extends Controller
             'nama_produk' => 'required',
             'category_id' => 'required',
             'harga'       => 'required|numeric',
-            'status'      => 'required'
+            'status'      => 'required',
+            'gambar'      => 'nullable|image|mimes:jpg,jpeg,png,webp',
+            'deskripsi'   => 'nullable|string|max:1000',
+            'estimasi'    => 'nullable|string|max:100',
 
         ]);
 
         // UPLOAD GAMBAR
         if ($request->hasFile('gambar')) {
 
-            $path = $request->file('gambar')
-                            ->store('products', 'public');
+            $destination = '/home/u872760679/domains/macabliss.com/public_html/storage/products';
+
+            if (!File::exists($destination)) {
+                File::makeDirectory($destination, 0755, true);
+            }
+
+            $filename = time().'_'.uniqid().'.'.$request->file('gambar')->extension();
+
+            $request->file('gambar')->move($destination, $filename);
+
+            $path = 'products/'.$filename;
 
         } else {
 
@@ -120,17 +133,63 @@ class ProductController extends Controller
             'nama_produk' => 'required',
             'category_id' => 'required',
             'harga'       => 'required|numeric',
-            'status'      => 'required'
+            'status'      => 'required',
+            'gambar'      => 'nullable|image|mimes:jpg,jpeg,png,webp',
+            'deskripsi'   => 'nullable|string|max:1000',
+            'estimasi'    => 'nullable|string|max:100'
 
         ]);
 
-        // CHECK GAMBAR
-        if ($request->hasFile('gambar')) {
+        // HAPUS GAMBAR
+        if ($request->hapus_gambar == 1) {
 
-            $path = $request->file('gambar')
-                            ->store('products', 'public');
+            if ($product->gambar) {
 
-        } else {
+                $file = '/home/u872760679/domains/macabliss.com/public_html/storage/' . $product->gambar;
+
+                if (File::exists($file)) {
+
+                    File::delete($file);
+
+                }
+
+            }
+
+            $path = null;
+
+        }
+
+        // UPLOAD GAMBAR BARU
+        elseif ($request->hasFile('gambar')) {
+
+            $destination = '/home/u872760679/domains/macabliss.com/public_html/storage/products';
+
+            if (!File::exists($destination)) {
+                File::makeDirectory($destination, 0755, true);
+            }
+
+            if ($product->gambar) {
+
+                $oldFile = '/home/u872760679/domains/macabliss.com/public_html/storage/' . $product->gambar;
+
+                if (File::exists($oldFile)) {
+
+                    File::delete($oldFile);
+
+                }
+
+            }
+
+            $filename = time() . '_' . uniqid() . '.' . $request->file('gambar')->extension();
+
+            $request->file('gambar')->move($destination, $filename);
+
+            $path = 'products/' . $filename;
+
+        }
+
+        // TIDAK ADA PERUBAHAN GAMBAR
+        else {
 
             $path = $product->gambar;
 
@@ -158,6 +217,16 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
+        if ($product->gambar) {
+
+            $file = '/home/u872760679/domains/macabliss.com/public_html/storage/' . $product->gambar;
+
+            if (File::exists($file)) {
+                File::delete($file);
+            }
+
+        }
+
         $product->delete();
 
         return redirect('/products')

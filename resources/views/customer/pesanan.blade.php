@@ -49,10 +49,10 @@
                 <div class="w-[120px] flex flex-col items-center">
 
                     <!-- FOTO -->
-                    @if(!empty($item['gambar']) && file_exists(public_path('storage/'.$item['gambar'])))
+                    @if(!empty($item['gambar']))
 
                         <img src="{{ asset('storage/'.$item['gambar']) }}"
-                             class="w-24 h-24 object-cover rounded-2xl shadow-sm">
+                            class="w-24 h-24 object-cover rounded-2xl shadow-sm">
 
                     @else
 

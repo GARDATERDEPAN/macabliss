@@ -4,17 +4,6 @@
 
 <div class="max-w-7xl mx-auto px-4 py-8">
 
-    <!-- HEADER -->
-    {{-- <div class="flex justify-between items-center mb-10">
-
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900">
-                Macabliss
-            </h1>
-        </div>
-
-    </div> --}}
-
     <!-- HERO CARD -->
     <div class="relative bg-gradient-to-r from-red-400 to-red-500 rounded-3xl shadow-xl p-6 md:p-8 mb-8 text-white">
 
@@ -52,91 +41,14 @@
 
     </div>
 
-    <!-- CARA PEMESANAN -->
-    {{-- <div class="mb-10">
-
-        <h2 class="text-2xl font-bold text-gray-800 mb-5">
-            Cara Pemesanan
-        </h2>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-
-            <div class="bg-white rounded-2xl shadow-md p-5 hover:shadow-xl transition">
-
-                <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center text-2xl mb-4">
-                    1️⃣
-                </div>
-
-                <h3 class="font-bold text-lg mb-2">
-                    Pilih Kategori
-                </h3>
-
-                <p class="text-sm text-gray-500">
-                    Pilih kategori produk yang ingin dipesan.
-                </p>
-
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-md p-5 hover:shadow-xl transition">
-
-                <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center text-2xl mb-4">
-                    2️⃣
-                </div>
-
-                <h3 class="font-bold text-lg mb-2">
-                    Tambah Keranjang
-                </h3>
-
-                <p class="text-sm text-gray-500">
-                    Tambahkan produk ke keranjang belanja.
-                </p>
-
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-md p-5 hover:shadow-xl transition">
-
-                <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center text-2xl mb-4">
-                    3️⃣
-                </div>
-
-                <h3 class="font-bold text-lg mb-2">
-                    Isi Data Pesanan
-                </h3>
-
-                <p class="text-sm text-gray-500">
-                    Tentukan metode pengambilan atau pengiriman.
-                </p>
-
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-md p-5 hover:shadow-xl transition">
-
-                <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center text-2xl mb-4">
-                    4️⃣
-                </div>
-
-                <h3 class="font-bold text-lg mb-2">
-                    Selesaikan Pembayaran
-                </h3>
-
-                <p class="text-sm text-gray-500">
-                    Bayar melalui QRIS atau COD dan tunggu pesanan diproses.
-                </p>
-
-            </div>
-
-        </div>
-
-    </div> --}}
-
     <!-- JUDUL KATEGORI -->
     <div class="mb-6">
 
-        <h2 class="text-2xl font-bold text-gray-800">
+        <h2 class="text-center text-2xl font-bold text-gray-800">
             Kategori Produk
         </h2>
 
-        <p class="text-gray-500 mt-2">
+        <p class="text-center text-gray-500 mt-2">
             Pilih salah satu kategori untuk melihat produk yang tersedia.
         </p>
 
@@ -153,12 +65,12 @@
             <button
                 onclick="showCategory({{ $category->id }})"
                 class="flex flex-col items-center
-                       hover:scale-105 transition duration-300">
+                    hover:scale-105 transition duration-300">
 
-                @if($category->gambar && file_exists(public_path('images/' . $category->gambar)))
+                @if($category->gambar)
 
-                    <img src="{{ asset('images/' . $category->gambar) }}"
-                         class="w-28 h-28 md:w-40 md:h-40 lg:w-44 lg:h-44 rounded-full
+                    <img src="{{ asset('storage/' . $category->gambar) }}"
+                        class="w-28 h-28 md:w-40 md:h-40 lg:w-44 lg:h-44 rounded-full
                                 object-cover border-[6px]
                                 border-red-100 shadow-xl">
 
@@ -177,7 +89,7 @@
                 @endif
 
                 <p class="mt-4 text-xl font-bold
-                          text-gray-800 text-center">
+                        text-gray-800 text-center">
 
                     {{ $category->nama_kategori }}
 
@@ -190,34 +102,32 @@
     </div>
 
     <!-- GALERI PRODUK -->
-    <div class="mt-16 mb-10">
+    <div class="mt-16 mb-16">
 
         <div class="mb-6">
 
-            <h2 class="text-2xl font-bold text-gray-800">
+            <h2 class="text-center text-2xl font-bold text-gray-800">
                 Menu Produk
             </h2>
 
-            <p class="text-gray-500 mt-2">
+            <p class="text-center text-gray-500 mt-2">
                 Beberapa produk yang tersedia di Macabliss.
             </p>
 
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
 
             @foreach ($galeries as $item)
 
                 <div
                     class="group overflow-hidden rounded-3xl shadow-lg bg-white">
 
-                    @if($item->gambar && file_exists(public_path('storage/' . $item->gambar)))
+                    @if($item->gambar)
 
                         <img
                             src="{{ asset('storage/' . $item->gambar) }}"
-                            class="w-full h-52 object-cover
-                                group-hover:scale-110
-                                transition duration-500">
+                            class="w-full h-52 object-cover">
 
                     @else
 
@@ -236,30 +146,76 @@
 
                     <div class="p-4">
 
-    <div class="flex justify-between items-start gap-3">
+                        <h3 class="font-bold text-lg text-gray-800">
+                            {{ $item->nama_produk }}
+                        </h3>
 
-        <div>
+                        <div class="mt-3 flex items-center justify-between gap-3">
 
-            <h3 class="font-bold text-lg text-gray-800">
-                {{ $item->nama_produk }}
-            </h3>
+                            <p class="text-red-500 font-semibold text-md">
+                                Rp {{ number_format($item->harga,0,',','.') }}
+                            </p>
 
-            <p class="text-red-500 font-semibold mt-1">
-                Rp {{ number_format($item->harga,0,',','.') }}
-            </p>
+                            <div
+                                class="
+                                    relative
+                                    w-20 md:w-24
+                                    h-9
+                                    flex-shrink-0
+                                "
+                            >
 
-        </div>
+    <button
+        onclick="addItem({{ $item->id }}, {{ $item->harga }})"
+        id="gallery-add-btn-{{ $item->id }}"
+        class="
+            absolute inset-0
+            flex items-center justify-center
+            border-2 border-red-400
+            bg-white
+            text-red-500
+            rounded-full
+            text-xs md:text-sm
+            font-semibold
+            hover:bg-red-400
+            hover:text-white
+            transition
+        "
+    >
+        Add
+    </button>
+
+    <div
+        id="gallery-counter-{{ $item->id }}"
+        class="
+            absolute inset-0 hidden
+            items-center justify-between
+            bg-red-400
+            text-white
+            rounded-full
+            px-3
+            text-sm
+        ">
 
         <button
-            onclick="addItem({{ $item->id }}, {{ $item->harga }})"
-            class="bg-red-400 hover:bg-red-500
-                   text-white w-10 h-10
-                   rounded-full
-                   shadow-md
-                   flex items-center
-                   justify-center
-                   transition
-                   hover:scale-110">
+            onclick="decreaseItem({{ $item->id }})"
+            class="text-base font-bold">
+
+            -
+
+        </button>
+
+        <span
+            id="gallery-qty-{{ $item->id }}"
+            class="text-base font-bold">
+
+            1
+
+        </span>
+
+        <button
+            onclick="increaseItem({{ $item->id }})"
+            class="text-lg font-bold">
 
             +
 
@@ -269,7 +225,11 @@
 
 </div>
 
-                </div>
+                        </div>
+
+                    </div>
+
+                </div> 
 
             @endforeach
 
@@ -343,7 +303,7 @@
                 <input type="text"
                        id="popup-search"
                        placeholder="Cari produk..."
-                       class="w-[220px]
+                       class="w-[160px]
                               border border-gray-300
                               rounded-full
                               px-5 py-3
@@ -421,8 +381,180 @@
 
 </div>
 
+<!-- TESTIMONIAL -->
+<section class="mt-0 mb-8">
+
+    <!-- TITLE -->
+    <div class="text-center mb-8">
+
+        <h2
+            class="text-2xl
+                   font-bold
+                   text-gray-800"
+        >
+            Testimoni Pelanggan
+        </h2>
+
+        <p
+            class="text-gray-500
+                   mt-2"
+        >
+            Apa kata pelanggan tentang produk Macabliss
+        </p>
+
+    </div>
+
+
+    <!-- GRID -->
+    <div
+        class="w-full
+            grid
+            grid-cols-2
+            md:grid-cols-3
+            gap-4 md:gap-5"
+    >
+
+        @forelse($testimonials->take(6) as $testimonial)
+
+            <div
+                class="bg-white
+                       rounded-3xl
+                       shadow-lg
+                       hover:shadow-xl
+                       transition
+                       p-4
+                       min-h-[170px]"
+            >
+
+                <!-- RATING -->
+                <div
+                    class="flex
+                           gap-1
+                           mb-4"
+                >
+
+                    @for($i = 1; $i <= 5; $i++)
+
+                        <span
+                            class="
+                            text-lg
+                            {{ $i <= $testimonial->rating
+                                ? 'text-yellow-400'
+                                : 'text-gray-300'
+                            }}
+                            "
+                        >
+                            ★
+                        </span>
+
+                    @endfor
+
+                </div>
+
+
+                <!-- KOMENTAR -->
+                <div
+                    class="px-1
+                           min-h-[72px]
+                           "
+                >
+
+                    <p
+                        class="text-gray-600
+                               italic
+                                leading-6
+                                text-sm
+                                line-clamp-3"
+                    >
+                        "{{ $testimonial->komentar }}"
+                    </p>
+
+                </div>
+
+
+                <!-- GARIS -->
+                <div
+                    class="border-t
+                           border-gray-100
+                            w-[90%]
+           mx-auto
+           mt-2
+           mb-2"
+                ></div>
+
+
+                <!-- CUSTOMER -->
+                <div
+                    class="flex
+                           items-center
+                           gap-3"
+                >
+
+                    <!-- AVATAR -->
+                    <div
+                        class="w-12
+                               h-12
+                               rounded-full
+                               bg-red-100
+                               flex
+                               items-center
+                               justify-center
+                               text-red-500
+                               font-bold
+                               text-lg
+                               shrink-0"
+                    >
+
+                        {{ strtoupper(substr($testimonial->user->name, 0, 1)) }}
+
+                    </div>
+
+
+                    <!-- INFO -->
+                    <div>
+
+                        <h4
+                            class="font-semibold
+                                   text-gray-900
+                                   text-base"
+                        >
+                            {{ $testimonial->user->name }}
+                        </h4>
+
+                        <p
+                            class="text-sm
+                                   text-gray-500"
+                        >
+                            {{ $testimonial->product->nama_produk }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        @empty
+
+            <div
+                class="col-span-full
+                       text-center
+                       py-10
+                       text-gray-400"
+            >
+
+                Belum ada testimoni pelanggan.
+
+            </div>
+
+        @endforelse
+
+    </div>
+
+</section>
+
 <!-- FOOTER -->
-<footer class="bg-white border-t mt-1 rounded-t-3xl overflow-hidden">
+<footer class="bg-white border-t mt-2 rounded-t-3xl overflow-hidden">
 
     <div class="max-w-7xl mx-auto px-4 md:px-8 py-8">
 
@@ -439,7 +571,7 @@
             </div>
 
             <!-- SOSIAL MEDIA -->
-            <div class="flex items-center gap-8">
+            <div class="flex items-center gap-6">
 
                 <!-- INSTAGRAM -->
                 <a
@@ -558,54 +690,100 @@ const categoryProducts = {
         @foreach($category->products as $item)
 
         {
-
             id: "{{ $item->id }}",
             nama: "{{ $item->nama_produk }}",
             deskripsi: "{{ $item->deskripsi ?? '-' }}",
             harga: "{{ number_format($item->harga, 0, ',', '.') }}",
             hargaRaw: "{{ $item->harga }}",
-            rating: "{{ $item->averageRating() ?: 0 }}",
-            total: "{{ $item->totalRatings() }}",
+            average_rating: {{ $item->averageRating() ?? 0 }},
+            total_ratings: {{ $item->totalRatings() ?? 0 }},
             estimasi: "{{ $item->estimasi ?? '-' }}",
-
-            gambar: `
-
-            @if($item->gambar && file_exists(public_path('storage/' . $item->gambar)))
-
-                <img src="{{ asset('storage/' . $item->gambar) }}"
-                     onclick="openImage('{{ asset('storage/' . $item->gambar) }}')"
-                     class="w-32 h-32 rounded-2xl
-                            object-cover cursor-pointer
-                            hover:scale-105 transition">
-
-            @else
-
-                <div class="w-32 h-32 rounded-2xl
-                            bg-gray-200 flex
-                            items-center justify-center
-                            text-gray-500">
-
-                    No Image
-
-                </div>
-
-            @endif
-
-            `
-
-        },
+            gambar: "{{ $item->gambar ? asset('storage/' . $item->gambar) : '' }}"
+        }@if(!$loop->last),@endif
 
         @endforeach
 
     ]
 
-},
+}@if(!$loop->last),@endif
 
 @endforeach
 
 };
 
-// SHOW CATEGORY
+function generateStars(rating) {
+
+    rating = parseFloat(rating);
+
+    let html = '';
+
+    for (let i = 1; i <= 5; i++) {
+
+        let fill = 0;
+
+        if (rating >= i) {
+
+            fill = 100;
+
+        }
+        else if (rating >= i - 0.5) {
+
+            fill = 50;
+
+        }
+
+        html += `
+        <div class="relative w-5 h-5">
+
+            <!-- STAR ABU -->
+            <svg
+                class="absolute inset-0 w-5 h-5 text-gray-300"
+                fill="currentColor"
+                viewBox="0 0 20 20">
+
+                <path d="M9.049 2.927c.3-.921 1.603-.921
+                1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969
+                0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0
+                00-.364 1.118l1.07 3.292c.3.921-.755
+                1.688-1.54 1.118l-2.8-2.034a1 1 0
+                00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118
+                l1.07-3.292a1 1 0 00-.364-1.118L2.98
+                8.72c-.783-.57-.38-1.81.588-1.81h3.461a1
+                1 0 00.951-.69l1.07-3.292z"/>
+            </svg>
+
+            <!-- STAR KUNING -->
+            <div
+                class="absolute inset-0 overflow-hidden"
+                style="width:${fill}%">
+
+                <svg
+                    class="w-5 h-5 text-yellow-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20">
+
+                    <path d="M9.049 2.927c.3-.921 1.603-.921
+                    1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969
+                    0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0
+                    00-.364 1.118l1.07 3.292c.3.921-.755
+                    1.688-1.54 1.118l-2.8-2.034a1 1 0
+                    00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118
+                    l1.07-3.292a1 1 0 00-.364-1.118L2.98
+                    8.72c-.783-.57-.38-1.81.588-1.81h3.461a1
+                    1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+
+            </div>
+
+        </div>
+        `;
+
+    }
+
+    return html;
+
+}
+
 function showCategory(id){
 
     const overlay =
@@ -637,13 +815,31 @@ function showCategory(id){
                     p-5 flex gap-5">
 
             <!-- LEFT -->
-            <div class="flex flex-col
-                        items-center">
+            <div class="flex flex-col items-center">
 
                 <!-- IMAGE -->
                 <div>
 
-                    ${item.gambar}
+                    ${
+                        item.gambar
+                        ? `
+                            <img src="${item.gambar}"
+                                onclick="openImage('${item.gambar}')"
+                                class="w-32 h-32 rounded-2xl
+                                       object-cover cursor-pointer
+                                       hover:scale-105 transition">
+                        `
+                        : `
+                            <div class="w-32 h-32 rounded-2xl
+                                        bg-gray-200 flex
+                                        items-center justify-center
+                                        text-gray-500">
+
+                                No Image
+
+                            </div>
+                        `
+                    }
 
                 </div>
 
@@ -652,7 +848,6 @@ function showCategory(id){
                             w-[140px]
                             h-[46px]">
 
-                    <!-- ADD -->
                     <button
                         onclick="addItem(${item.id}, ${item.hargaRaw})"
                         id="add-btn-${item.id}"
@@ -669,7 +864,6 @@ function showCategory(id){
 
                     </button>
 
-                    <!-- COUNTER -->
                     <div id="counter-${item.id}"
                         class="absolute inset-0 hidden
                                items-center justify-between
@@ -706,34 +900,26 @@ function showCategory(id){
             </div>
 
             <!-- RIGHT -->
-            <div class="flex-1 flex
-                        flex-col justify-center">
+            <div class="flex-1 flex flex-col justify-center">
 
-                <!-- NAMA -->
-                <h3 class="text-xl font-bold
-                           text-gray-900">
+                <h3 class="text-xl font-bold text-gray-900">
 
                     ${item.nama}
 
                 </h3>
 
-                <!-- DESKRIPSI -->
-                <p class="text-sm text-gray-500
-                          mt-2 line-clamp-2">
+                <p class="text-sm text-gray-500 mt-2 line-clamp-2">
 
                     ${item.deskripsi}
 
                 </p>
 
-                <!-- HARGA -->
-                <p class="mt-3 text-lg
-                          font-bold text-red-500">
+                <p class="mt-3 text-lg font-bold text-red-500">
 
                     Rp ${item.harga}
 
                 </p>
 
-                <!-- ESTIMASI -->
                 <p class="mt-2 text-sm text-gray-500">
 
                     Estimasi: ${item.estimasi}
@@ -743,21 +929,30 @@ function showCategory(id){
                 <!-- RATING -->
                 <div class="mt-3">
 
-                    <div class="flex items-center gap-1">
+                    ${
+                        item.total_ratings > 0
+                        ? `
+                            <div class="flex items-center gap-1 mb-1">
 
-                        ${generateStars(item.id)}
+                                ${generateStars(item.average_rating)}
 
-                    </div>
+                            </div>
 
-                    <p class="text-sm text-gray-400 mt-1">
+                            <p class="text-sm text-gray-500">
 
-                        <span id="rating-text-${item.id}">
+                                ${item.average_rating}
+                                (${item.total_ratings} ulasan)
 
-                            ${getAverageRating(item.id)}
+                            </p>
+                        `
+                        : `
+                            <p class="text-sm text-gray-400">
 
-                        </span>
+                                Belum ada ulasan
 
-                    </p>
+                            </p>
+                        `
+                    }
 
                 </div>
 
@@ -769,12 +964,11 @@ function showCategory(id){
 
     });
 
-    // SEARCH POPUP
+
     document.getElementById('popup-search')
     .addEventListener('keyup', function(){
 
-        const keyword =
-            this.value.toLowerCase();
+        const keyword = this.value.toLowerCase();
 
         document.querySelectorAll('.popup-product')
         .forEach(product => {
@@ -827,41 +1021,110 @@ document.getElementById('popup-overlay')
 document.addEventListener("DOMContentLoaded", function(){
 
     updateCartBar();
+    syncCartUI();
 
 });
 
 // SYNC UI
 function syncCartUI(){
 
-    Object.keys(cart).forEach(id => {
+    // RESET POPUP BUTTON
+    document.querySelectorAll('[id^="add-btn-"]')
+    .forEach(btn => {
 
-        let item = cart[id];
-
-        let addBtn =
-            document.getElementById('add-btn-' + id);
+        let id = btn.id.replace('add-btn-', '');
 
         let counter =
-            document.getElementById('counter-' + id);
+            document.getElementById(
+                'counter-' + id
+            );
 
-        let qty =
-            document.getElementById('qty-' + id);
+        if(cart[id]){
 
-        if(addBtn){
+            btn.classList.add('hidden');
 
-            addBtn.classList.add('hidden');
+            if(counter){
+
+                counter.classList.remove('hidden');
+                counter.classList.add('flex');
+
+                let qty =
+                    document.getElementById(
+                        'qty-' + id
+                    );
+
+                if(qty){
+
+                    qty.innerText =
+                        cart[id].qty;
+
+                }
+
+            }
+
+        } else {
+
+            btn.classList.remove('hidden');
+
+            if(counter){
+
+                counter.classList.remove('flex');
+                counter.classList.add('hidden');
+
+            }
 
         }
 
-        if(counter){
+    });
 
-            counter.classList.remove('hidden');
-            counter.classList.add('flex');
+    // RESET GALERI
+    document.querySelectorAll('[id^="gallery-add-btn-"]')
+    .forEach(btn => {
 
-        }
+        let id =
+            btn.id.replace(
+                'gallery-add-btn-',
+                ''
+            );
 
-        if(qty){
+        let counter =
+            document.getElementById(
+                'gallery-counter-' + id
+            );
 
-            qty.innerText = item.qty;
+        if(cart[id]){
+
+            btn.classList.add('hidden');
+
+            if(counter){
+
+                counter.classList.remove('hidden');
+                counter.classList.add('flex');
+
+                let qty =
+                    document.getElementById(
+                        'gallery-qty-' + id
+                    );
+
+                if(qty){
+
+                    qty.innerText =
+                        cart[id].qty;
+
+                }
+
+            }
+
+        } else {
+
+            btn.classList.remove('hidden');
+
+            if(counter){
+
+                counter.classList.remove('flex');
+                counter.classList.add('hidden');
+
+            }
 
         }
 
@@ -949,20 +1212,68 @@ function decreaseItem(id){
 
     .then(() => {
 
-        if(cart[id].qty > 1){
+    if(cart[id].qty > 1){
 
-            cart[id].qty--;
+        cart[id].qty--;
 
-        } else {
+    } else {
 
-            delete cart[id];
+        delete cart[id];
+
+        // POPUP
+        let addBtn =
+            document.getElementById(
+                'add-btn-' + id
+            );
+
+        let counter =
+            document.getElementById(
+                'counter-' + id
+            );
+
+        if(addBtn){
+
+            addBtn.classList.remove('hidden');
 
         }
 
-        updateCartBar();
-        refreshPopup();
+        if(counter){
 
-    });
+            counter.classList.remove('flex');
+            counter.classList.add('hidden');
+
+        }
+
+        // GALERI
+        let galleryAddBtn =
+            document.getElementById(
+                'gallery-add-btn-' + id
+            );
+
+        let galleryCounter =
+            document.getElementById(
+                'gallery-counter-' + id
+            );
+
+        if(galleryAddBtn){
+
+            galleryAddBtn.classList.remove('hidden');
+
+        }
+
+        if(galleryCounter){
+
+            galleryCounter.classList.remove('flex');
+            galleryCounter.classList.add('hidden');
+
+        }
+
+    }
+
+    updateCartBar();
+    syncCartUI();
+
+});
 
 }
 
@@ -1053,136 +1364,6 @@ function openImage(src){
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
-
-}
-
-// GENERATE STARS
-function generateStars(productId){
-
-    let html = '';
-
-    let current =
-        localStorage.getItem(
-            'user_rating_' + productId
-        ) || 0;
-
-    let locked = current > 0;
-
-    for(let i = 1; i <= 5; i++){
-
-        html += `
-
-        <button
-            ${locked
-                ? 'disabled'
-                : `onclick="saveRating(${productId}, ${i})"`
-            }
-
-            class="
-                ${i <= current
-                    ? 'text-yellow-400'
-                    : 'text-gray-300'}
-
-                text-2xl
-
-                ${locked
-                    ? 'cursor-default'
-                    : 'hover:scale-110'}
-
-                transition">
-
-            ★
-
-        </button>
-
-        `;
-
-    }
-
-    return html;
-
-}
-
-// SAVE RATING
-function saveRating(productId, rating){
-
-    // CHECK USER SUDAH RATING?
-    let alreadyRated =
-        localStorage.getItem(
-            'user_rating_' + productId
-        );
-
-    // JIKA SUDAH
-    if(alreadyRated){
-
-        alert(
-            'Kamu sudah memberi rating ⭐'
-        );
-
-        return;
-
-    }
-
-    // SIMPAN USER RATING
-    localStorage.setItem(
-        'user_rating_' + productId,
-        rating
-    );
-
-    // GET SEMUA RATING
-    let ratings =
-        JSON.parse(
-            localStorage.getItem(
-                'ratings_' + productId
-            )
-        ) || [];
-
-    // TAMBAH RATING BARU
-    ratings.push(rating);
-
-    // SAVE
-    localStorage.setItem(
-        'ratings_' + productId,
-        JSON.stringify(ratings)
-    );
-
-    // REFRESH
-    refreshPopup();
-
-}
-
-// GET AVG
-function getAverageRating(productId){
-
-    let ratings =
-        JSON.parse(
-            localStorage.getItem(
-                'ratings_' + productId
-            )
-        ) || [];
-
-    if(ratings.length === 0){
-
-        return 'Belum ada rating';
-
-    }
-
-    let total = 0;
-
-    ratings.forEach(rate => {
-
-        total += parseInt(rate);
-
-    });
-
-    let avg =
-        (total / ratings.length)
-        .toFixed(1);
-
-    return `
-        ⭐ ${avg}
-        (${ratings.length})
-    `;
 
 }
 

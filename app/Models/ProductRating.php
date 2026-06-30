@@ -7,9 +7,31 @@ use Illuminate\Database\Eloquent\Model;
 class ProductRating extends Model
 {
     protected $fillable = [
+
+        'user_id',
+
+        'order_id',
+
         'product_id',
+
         'rating',
+
+        'komentar',
+
     ];
+
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+
 
     public function product()
     {

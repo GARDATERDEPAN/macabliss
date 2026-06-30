@@ -131,31 +131,60 @@
 
                 @if($product->gambar)
 
-                    <img src="{{ asset('storage/' . $product->gambar) }}"
-                         class="w-20 h-20 object-cover rounded mb-2">
+                    <div
+                        id="preview-gambar"
+                        class="relative w-fit mb-3">
 
-                @endif
+                        <img
+                            src="{{ asset('storage/' . $product->gambar) }}"
+                            class="w-20 h-20 object-cover rounded border">
+
+                        <button
+                            type="button"
+                            onclick="hapusGambar()"
+                            class="absolute -top-2 -right-2
+                                w-6 h-6
+                                bg-red-500
+                                text-white
+                                rounded-full
+                                text-xs
+                                hover:bg-red-600">
+
+                            ✕
+
+                        </button>
+
+                    </div>
+
+                    <input
+                        type="hidden"
+                        id="hapus_gambar"
+                        name="hapus_gambar"
+                        value="0">
+
+                    @endif
 
                 <input type="file"
-                       name="gambar"
-                       class="border p-2 rounded">
+                    name="gambar"
+                    class="border p-2 rounded">
 
             </div>
 
         </div>
 
-
         <!-- BUTTON -->
-        <div class="flex justify-end gap-4 mt-8">
+        <div class="w-full flex justify-end gap-4 mt-8">
 
             <a href="{{ route('products.index') }}"
-               class="px-6 py-2 border rounded-lg">
+            class="px-6 py-2 border rounded-lg">
 
                 Kembali
 
             </a>
 
-            <button class="bg-red-400 text-white px-6 py-2 rounded-lg hover:bg-red-600">
+            <button
+                type="submit"
+                class="bg-red-400 text-white px-6 py-2 rounded-lg hover:bg-red-600">
 
                 Update
 
@@ -166,5 +195,21 @@
     </form>
 
 </div>
+
+<script>
+
+function hapusGambar() {
+
+    document
+        .getElementById('hapus_gambar')
+        .value = 1;
+
+    document
+        .getElementById('preview-gambar')
+        .style.display = 'none';
+
+}
+
+</script>
 
 @endsection

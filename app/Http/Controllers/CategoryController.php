@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Category;
+use Illuminate\Support\Facades\File;
 
 class CategoryController extends Controller
 {
@@ -33,18 +34,24 @@ class CategoryController extends Controller
     {
         $request->validate([
             'nama_kategori' => 'required',
-            'gambar' => 'nullable|image'
+            'gambar' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
         ]);
 
         $gambar = null;
 
         if ($request->hasFile('gambar')) {
 
-            $file = $request->file('gambar');
+            $destination = '/home/u872760679/domains/macabliss.com/public_html/storage/categories';
 
-            $gambar = time() . '_' . $file->getClientOriginalName();
+            if (!File::exists($destination)) {
+                File::makeDirectory($destination, 0755, true);
+            }
 
-            $file->move(public_path('images'), $gambar);
+            $filename = time() . '_' . $request->file('gambar')->getClientOriginalName();
+
+            $request->file('gambar')->move($destination, $filename);
+
+            $gambar = 'categories/' . $filename;
         }
 
         Category::create([
@@ -69,19 +76,59 @@ class CategoryController extends Controller
 
         $request->validate([
             'nama_kategori' => 'required',
-            'gambar' => 'nullable|image'
+            'gambar' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
         ]);
 
         $gambar = $category->gambar;
 
-        if ($request->hasFile('gambar')) {
+            // HAPUS GAMBAR
+            if ($request->hapus_gambar == 1) {
 
-            $file = $request->file('gambar');
+                if ($category->gambar) {
 
-            $gambar = time() . '_' . $file->getClientOriginalName();
+                    $oldFile = '/home/u872760679/domains/macabliss.com/public_html/storage/' . $category->gambar;
 
-            $file->move(public_path('images'), $gambar);
-        }
+                    if (File::exists($oldFile)) {
+
+                        File::delete($oldFile);
+
+                    }
+
+                }
+
+                $gambar = null;
+
+            }
+
+            // UPLOAD GAMBAR BARU
+            elseif ($request->hasFile('gambar')) {
+
+                $destination = '/home/u872760679/domains/macabliss.com/public_html/storage/categories';
+
+                if (!File::exists($destination)) {
+                    File::makeDirectory($destination, 0755, true);
+                }
+
+                // Hapus gambar lama
+                if ($category->gambar) {
+
+                    $oldFile = '/home/u872760679/domains/macabliss.com/public_html/storage/' . $category->gambar;
+
+                    if (File::exists($oldFile)) {
+
+                        File::delete($oldFile);
+
+                    }
+
+                }
+
+                $filename = time() . '_' . $request->file('gambar')->getClientOriginalName();
+
+                $request->file('gambar')->move($destination, $filename);
+
+                $gambar = 'categories/' . $filename;
+
+            }
 
         $category->update([
             'nama_kategori' => $request->nama_kategori,
@@ -95,6 +142,15 @@ class CategoryController extends Controller
     public function destroy($id)
     {
         $category = Category::findOrFail($id);
+
+        if ($category->gambar) {
+
+            $file = '/home/u872760679/domains/macabliss.com/public_html/storage/' . $category->gambar;
+
+            if (File::exists($file)) {
+                File::delete($file);
+            }
+        }
 
         $category->delete();
 

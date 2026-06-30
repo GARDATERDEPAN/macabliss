@@ -53,14 +53,43 @@
 
                 @if($category->gambar)
 
-                    <img src="{{ asset('images/' . $category->gambar) }}"
-                         class="w-20 h-20 object-cover rounded-full mb-2 border">
+                    <div
+                        id="preview-gambar"
+                        class="relative w-fit mb-3">
+
+                        <img
+                            src="{{ asset('storage/' . $category->gambar) }}"
+                            class="w-20 h-20 object-cover rounded-full border">
+
+                        <button
+                            type="button"
+                            onclick="hapusGambar()"
+                            class="absolute -top-2 -right-2
+                                w-6 h-6
+                                bg-red-500
+                                text-white
+                                rounded-full
+                                text-xs
+                                hover:bg-red-600">
+
+                            ✕
+
+                        </button>
+
+                    </div>
+
+                    <input
+                        type="hidden"
+                        id="hapus_gambar"
+                        name="hapus_gambar"
+                        value="0">
 
                 @endif
 
-                <input type="file"
-                       name="gambar"
-                       class="border p-2 rounded">
+                <input
+                    type="file"
+                    name="gambar"
+                    class="border p-2 rounded">
 
             </div>
 
@@ -88,5 +117,21 @@
     </form>
 
 </div>
+
+<script>
+
+function hapusGambar() {
+
+    document
+        .getElementById('hapus_gambar')
+        .value = 1;
+
+    document
+        .getElementById('preview-gambar')
+        .style.display = 'none';
+
+}
+
+</script>
 
 @endsection

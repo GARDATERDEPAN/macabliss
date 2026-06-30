@@ -10,6 +10,7 @@ use Midtrans\Snap;
 use App\Models\Ongkir;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
@@ -141,6 +142,18 @@ class PaymentController extends Controller
     {
         try {
 
+            $request->validate([
+
+                'payment' => 'required',
+
+                'delivery_type' => 'required|in:pickup,delivery',
+
+                'tanggal_kirim' => 'required|date',
+
+                'alamat' => 'nullable|string|max:255'
+
+            ]);
+
             Config::$serverKey =
                 config('midtrans.server_key');
 
@@ -264,6 +277,29 @@ class PaymentController extends Controller
                 $subtotal +
                 $ongkir +
                 1000;
+            
+            /*
+            |--------------------------------------------------------------------------
+            | BATAS MAKSIMAL COD
+            |--------------------------------------------------------------------------
+            */
+
+            $maxCOD = 100000;
+
+            if (
+                $request->payment == 'COD'
+                &&
+                $total > $maxCOD
+            ) {
+
+                return response()->json([
+
+                    'message' =>
+                        'COD hanya berlaku untuk transaksi maksimal Rp100.000. Silakan gunakan QRIS.'
+
+                ], 400);
+
+            }
 
             /*
             |--------------------------------------------------------------------------
@@ -281,15 +317,15 @@ class PaymentController extends Controller
 
             $order = Order::create([
 
+                'user_id' => Auth::guard('customer')->id(),
+
                 'session_id' => session()->getId(),
 
                 'kode' => $kodeOrder,
 
-                'nama_customer' =>
-                    $request->nama,
+                'nama_customer' => Auth::guard('customer')->user()->name,
 
-                'no_hp' =>
-                    $request->no_hp,
+                'no_hp' => Auth::guard('customer')->user()->phone,
 
                 'alamat' =>
                     $request->alamat,
@@ -451,9 +487,9 @@ class PaymentController extends Controller
 
                 'customer_details' => [
 
-                    'first_name' => $request->nama,
+                    'first_name' => Auth::guard('customer')->user()->name,
 
-                    'phone' => $request->no_hp
+                    'phone' => Auth::guard('customer')->user()->phone,
 
                 ]
 
@@ -605,9 +641,13 @@ class PaymentController extends Controller
             */
 
             if (
+
                 $transaction == 'settlement'
                 ||
                 $transaction == 'capture'
+                ||
+                $transaction == 'challenge'
+
             ) {
 
                 if ($order->status != 'selesai') {

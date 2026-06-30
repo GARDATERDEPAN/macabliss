@@ -26,17 +26,25 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        if (auth()->user()->role !== 'admin') {
-            Auth::logout();
-
-            return back()->withErrors([
-                'email' => 'Akses hanya untuk admin',
-            ]);
-        }
-
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = auth()->user();
+
+        // ADMIN
+        if ($user->role === 'admin') {
+
+            return redirect()->route('dashboard');
+
+        }
+
+        // KASIR
+        if ($user->role === 'kasir') {
+
+            return redirect()->route('orders.index');
+
+        }
+
+        abort(403, 'Role tidak dikenali');
     }
 
     /**
@@ -44,12 +52,12 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::guard('web')->logout();
+        Auth::logout();
 
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('login');
     }
 }

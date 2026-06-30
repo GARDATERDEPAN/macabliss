@@ -143,6 +143,75 @@
 
             </div>
 
+            @php
+
+                $belumRating = false;
+
+                if($order->status == 'selesai'){
+
+                    foreach($order->details as $detail){
+
+                        $sudahRating = \App\Models\ProductRating::where(
+                            'user_id',
+                            Auth::guard('customer')->id()
+                        )
+                        ->where('order_id', $order->id)
+                        ->where('product_id', $detail->product_id)
+                        ->exists();
+
+                        if(!$sudahRating){
+
+                            $belumRating = true;
+
+                            break;
+
+                        }
+
+                    }
+
+                }
+
+            @endphp
+
+
+            @if($belumRating)
+
+            <div class="mb-4">
+
+                <div class="bg-yellow-50 border border-yellow-300 rounded-2xl p-4">
+
+                    <div class="flex items-start gap-3">
+
+                        <div class="text-2xl">
+                            ⭐
+                        </div>
+
+                        <div>
+
+                            <h4 class="font-semibold text-yellow-700">
+
+                                Berikan Rating & Ulasan
+
+                            </h4>
+
+                            <p class="text-sm text-yellow-600 mt-1">
+
+                                Pesanan telah selesai.
+                                Yuk berikan penilaian dan ulasan untuk produk
+                                yang telah Anda beli.
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            @endif
+
             <!-- ACTION BUTTON -->
             <div class="flex flex-wrap gap-3">
 

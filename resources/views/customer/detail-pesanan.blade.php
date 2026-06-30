@@ -1,5 +1,10 @@
 @extends('layouts.customer')
 
+@php
+    use Illuminate\Support\Facades\Auth;
+    use App\Models\ProductRating;
+@endphp
+
 @section('content')
 
 <div class="max-w-4xl mx-auto p-5">
@@ -275,6 +280,8 @@
                                 Rp {{ number_format($item->harga * $item->qty,0,',','.') }}
                             </td>
 
+                            
+
                         </tr>
 
                         @endforeach
@@ -351,6 +358,249 @@
                 </div>
 
             </div>
+
+            @if($order->status == 'selesai')
+
+                <div class="mt-6">
+
+                    <div class="bg-white border rounded-2xl p-5">
+
+                        <h2 class="text-lg font-semibold text-gray-800 mb-4">
+
+                            Beri Ulasan Produk
+
+                        </h2>
+
+                        <div class="space-y-5">
+
+                            @foreach($order->details as $item)
+
+                                @php
+
+                                    $ratingSaya = ProductRating::where(
+                                        'user_id',
+                                        Auth::guard('customer')->id()
+                                    )
+                                    ->where('order_id', $order->id)
+                                    ->where('product_id', $item->product_id)
+                                    ->first();
+
+                                @endphp
+
+                                <div class="border rounded-2xl p-4">
+
+                                    <div class="flex justify-between items-center mb-4">
+
+                                        <div>
+
+                                            <h3 class="font-semibold text-gray-800">
+
+                                                {{ $item->product->nama_produk }}
+
+                                            </h3>
+
+                                            <p class="text-sm text-gray-400">
+
+                                                Qty: {{ $item->qty }}
+
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    @if(!$ratingSaya)
+
+                                        <form
+                                            action="{{ route('rating.store') }}"
+                                            method="POST"
+                                            class="space-y-3"
+                                        >
+
+                                            @csrf
+
+                                            <input
+                                                type="hidden"
+                                                name="order_id"
+                                                value="{{ $order->id }}"
+                                            >
+
+                                            <input
+                                                type="hidden"
+                                                name="product_id"
+                                                value="{{ $item->product_id }}"
+                                            >
+
+                                            <div>
+
+                                                <label class="text-sm font-medium">
+
+                                                    Rating
+
+                                                </label>
+
+                                                <select
+                                                    name="rating"
+                                                    required
+                                                    class="w-full mt-2 border rounded-xl p-3"
+                                                >
+
+                                                    <option value="">
+                                                        Pilih Rating
+                                                    </option>
+
+                                                    <option value="5">
+                                                        ⭐⭐⭐⭐⭐ (5)
+                                                    </option>
+
+                                                    <option value="4">
+                                                        ⭐⭐⭐⭐ (4)
+                                                    </option>
+
+                                                    <option value="3">
+                                                        ⭐⭐⭐ (3)
+                                                    </option>
+
+                                                    <option value="2">
+                                                        ⭐⭐ (2)
+                                                    </option>
+
+                                                    <option value="1">
+                                                        ⭐ (1)
+                                                    </option>
+
+                                                </select>
+
+                                            </div>
+
+
+                                            <div>
+
+                                                <label class="text-sm font-medium">
+
+                                                    Ulasan
+
+                                                </label>
+
+                                                <textarea
+                                                    name="komentar"
+                                                    rows="3"
+                                                    placeholder="Tulis ulasan produk..."
+                                                    class="w-full mt-2 border rounded-xl p-3"
+                                                ></textarea>
+
+                                            </div>
+
+
+                                            <button
+                                                type="submit"
+                                                class="bg-red-500 hover:bg-red-600
+                                                    text-white px-5 py-2
+                                                    rounded-xl transition"
+                                            >
+
+                                                Kirim Rating
+
+                                            </button>
+
+                                        </form>
+
+                                   @else
+
+                                        <div
+                                            class="bg-green-50
+                                                border border-green-200
+                                                rounded-2xl
+                                                p-4"
+                                        >
+
+                                            <!-- BINTANG -->
+                                            <div class="text-2xl mb-3">
+
+                                                @for($i = 1; $i <= 5; $i++)
+
+                                                    @if($i <= $ratingSaya->rating)
+
+                                                        <span class="text-yellow-400">
+                                                            ★
+                                                        </span>
+
+                                                    @else
+
+                                                        <span class="text-gray-300">
+                                                            ★
+                                                        </span>
+
+                                                    @endif
+
+                                                @endfor
+
+                                            </div>
+
+
+                                            <!-- KOMENTAR -->
+                                            @if($ratingSaya->komentar)
+
+                                                <div
+                                                    class="bg-white
+                                                        border
+                                                        rounded-xl
+                                                        p-3
+                                                        text-gray-700
+                                                        italic"
+                                                >
+
+                                                    "{{ $ratingSaya->komentar }}"
+
+                                                </div>
+
+                                            @else
+
+                                                <div
+                                                    class="bg-white
+                                                        border
+                                                        rounded-xl
+                                                        p-3
+                                                        text-gray-400
+                                                        italic"
+                                                >
+
+                                                    Tidak ada ulasan.
+
+                                                </div>
+
+                                            @endif
+
+
+                                            <!-- STATUS -->
+                                            <div
+                                                class="mt-3
+                                                    text-sm
+                                                    text-green-600
+                                                    font-medium"
+                                            >
+
+                                                ✓ Anda sudah memberikan ulasan
+                                                untuk produk ini
+
+                                            </div>
+
+                                        </div>
+
+                                    @endif
+
+                                </div>
+
+                            @endforeach
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                @endif
 
             <!-- BUTTON -->
             <div class="flex justify-end mt-5">
