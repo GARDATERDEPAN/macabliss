@@ -32,6 +32,7 @@ class CustomerAuthController extends Controller
             ->where('role', 'customer')
             ->first();
 
+        // Kalau nomor belum ada, buat akun baru
         if (!$user) {
 
             $user = User::create([
@@ -44,17 +45,27 @@ class CustomerAuthController extends Controller
 
         } else {
 
-            if ($user->name !== $request->name) {
+            // Kalau nomor sudah ada tapi nama berbeda
+            if (
+                strtolower(trim($user->name))
+                !== strtolower(trim($request->name))
+            ) {
 
-                $user->update([
-                    'name' => $request->name
-                ]);
+                return back()
+                    ->withErrors([
+
+                        'phone' =>
+                            'Nomor HP ini sudah digunakan oleh '
+                            . $user->name
+                            . '. Silakan gunakan nama yang sama.'
+
+                    ])
+                    ->withInput();
 
             }
 
         }
 
-        // LOGIN KE GUARD CUSTOMER
         Auth::guard('customer')->login($user);
 
         return redirect()

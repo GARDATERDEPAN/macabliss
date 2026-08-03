@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Payment;
@@ -529,7 +530,9 @@ return response()->json([
     // OPTIONAL MANUAL BAYAR
     public function bayar($id)
     {
-        $order = Order::findOrFail($id);
+        $order = Order::where('id', $id)
+            ->where('user_id', Auth::guard('customer')->id())
+            ->firstOrFail();
 
         if ($order->payment) {
 
@@ -553,7 +556,10 @@ return response()->json([
 
     public function retryPayment($id)
     {
-        $order = Order::with('payment')->findOrFail($id);
+        $order = Order::with('payment')
+            ->where('id', $id)
+            ->where('user_id', Auth::guard('customer')->id())
+            ->firstOrFail();
 
         // MIDTRANS
         \Midtrans\Config::$serverKey = config('midtrans.server_key');

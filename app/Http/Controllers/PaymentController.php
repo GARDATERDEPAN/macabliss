@@ -11,6 +11,7 @@ use App\Models\Ongkir;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
@@ -144,7 +145,7 @@ class PaymentController extends Controller
 
             $request->validate([
 
-                'payment' => 'required',
+                'payment' => 'required|in:QRIS,COD',
 
                 'delivery_type' => 'required|in:pickup,delivery',
 
@@ -206,34 +207,7 @@ class PaymentController extends Controller
                 ]);
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | GENERATE KODE ORDER
-            |--------------------------------------------------------------------------
-            */
-
-            $lastOrder = Order::where('kode', 'like', 'M-%')
-                ->orderBy('id', 'desc')
-                ->first();
-
-            $number = 1;
-
-            if ($lastOrder) {
-
-                $lastNumber =
-                    (int) str_replace('M-', '', $lastOrder->kode);
-
-                $number = $lastNumber + 1;
-            }
-
-            $kodeOrder =
-                'M-' .
-                str_pad(
-                    $number,
-                    4,
-                    '0',
-                    STR_PAD_LEFT
-                );
+            
 
             /*
             |--------------------------------------------------------------------------
@@ -273,10 +247,12 @@ class PaymentController extends Controller
                     : 0;
             }
 
+            $adminFee = config('app.admin_fee');
+
             $total =
                 $subtotal +
                 $ongkir +
-                1000;
+                $adminFee;
             
             /*
             |--------------------------------------------------------------------------
@@ -301,12 +277,14 @@ class PaymentController extends Controller
 
             }
 
+            DB::beginTransaction();
+
             /*
             |--------------------------------------------------------------------------
             | SIMPAN ORDER
             |--------------------------------------------------------------------------
             */
-
+            
             $statusOrder = 'pending';
 
             if ($request->payment == 'COD') {
@@ -321,7 +299,7 @@ class PaymentController extends Controller
 
                 'session_id' => session()->getId(),
 
-                'kode' => $kodeOrder,
+                'kode' => '',
 
                 'nama_customer' => Auth::guard('customer')->user()->name,
 
@@ -352,6 +330,17 @@ class PaymentController extends Controller
 
             ]);
 
+            $order->update([
+                'kode' => 'M-' . str_pad(
+                    $order->id,
+                    4,
+                    '0',
+                    STR_PAD_LEFT
+                )
+            ]);
+
+            $midtransOrderId = $order->kode;
+
             /*
             |--------------------------------------------------------------------------
             | DETAIL ORDER
@@ -360,10 +349,9 @@ class PaymentController extends Controller
 
             foreach (session('cart', []) as $item) {
 
-                $product = \App\Models\Product::where(
-                    'nama_produk',
-                    $item['nama_produk']
-                )->first();
+                $product = \App\Models\Product::find(
+                    $item['product_id']
+                );
 
                 if (!$product) {
                     continue;
@@ -373,7 +361,7 @@ class PaymentController extends Controller
 
                     'order_id' => $order->id,
 
-                    'product_id' => $product->id,
+                    'product_id' => $item['product_id'],
 
                     'qty' => $item['qty'],
 
@@ -382,46 +370,6 @@ class PaymentController extends Controller
                 ]);
 
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | KODE PAYMENT
-            |--------------------------------------------------------------------------
-            */
-
-            $lastPayment = Payment::where(
-                    'kode_pembayaran',
-                    'like',
-                    'PAY-%'
-                )
-                ->orderBy('id', 'desc')
-                ->first();
-
-            $paymentNumber = 1;
-
-            if ($lastPayment) {
-
-                $lastNumber =
-                    (int) str_replace(
-                        'PAY-',
-                        '',
-                        $lastPayment->kode_pembayaran
-                    );
-
-                $paymentNumber = $lastNumber + 1;
-            }
-
-            $kodePayment =
-                'PAY-' .
-                str_pad(
-                    $paymentNumber,
-                    4,
-                    '0',
-                    STR_PAD_LEFT
-                );
-
-            $midtransOrderId =
-                $kodeOrder . '-' . time();
 
             /*
             |--------------------------------------------------------------------------
@@ -435,7 +383,7 @@ class PaymentController extends Controller
 
                 'order_id'          => $order->id,
 
-                'kode_pembayaran'   => $kodePayment,
+                'kode_pembayaran' => '',
 
                 'metode'            => $request->payment,
 
@@ -449,6 +397,15 @@ class PaymentController extends Controller
 
             ]);
 
+            $payment->update([
+                'kode_pembayaran' => 'PAY-' . str_pad(
+                    $payment->id,
+                    4,
+                    '0',
+                    STR_PAD_LEFT
+                )
+            ]);
+
             /*
             |--------------------------------------------------------------------------
             | COD
@@ -456,6 +413,8 @@ class PaymentController extends Controller
             */
 
             if ($request->payment == 'COD') {
+
+                DB::commit();
 
                 session()->forget('cart');
 
@@ -497,21 +456,22 @@ class PaymentController extends Controller
 
             $snapToken = Snap::getSnapToken($params);
 
-            $order->update([
+           $order->update([
                 'snap_token' => $snapToken,
                 'expired_at' => now()->addMinutes(15),
                 'payment_status' => 'pending'
             ]);
 
+            DB::commit();
+
             return response()->json([
-
                 'snap_token' => $snapToken,
-
                 'payment_id' => $payment->id
-
             ]);
 
         } catch (\Exception $e) {
+
+            DB::rollBack();
 
             \Log::error($e);
 

@@ -83,9 +83,15 @@ class CustomerController extends Controller
         } else {
 
             $cart[$id] = [
+
+                'product_id' => $product->id,
+
                 'nama' => $product->nama_produk,
+
                 'harga' => $product->harga,
-                'qty'   => 1
+
+                'qty' => 1
+
             ];
 
         }

@@ -32,6 +32,14 @@ return Application::configure(
         ]);
 
 
+        // EXCEPT CSRF UNTUK CALLBACK MIDTRANS
+        $middleware->validateCsrfTokens(except: [
+
+            'midtrans/callback',
+
+        ]);
+
+
         $middleware->append(
 
             SecurityHeaders::class

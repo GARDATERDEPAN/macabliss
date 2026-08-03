@@ -26,7 +26,15 @@
         <!-- CHAT -->
         <div
             id="chat-box"
-            class="h-[420px] overflow-y-auto p-6 bg-gray-50 space-y-4">
+            class="
+            h-[60vh]
+            md:h-[420px]
+            overflow-y-auto
+            p-3
+            md:p-6
+            bg-gray-50
+            space-y-4
+        ">
 
             @php
                 $lastDate = null;
@@ -77,7 +85,7 @@
 
                     <div
                         class="
-                        max-w-[75%]
+                        max-w-[85%] md:max-w-[75%]
                         px-4 py-2
                         rounded-2xl
                         text-sm
@@ -92,7 +100,13 @@
 
                             <img
                                 src="{{ asset('storage/'.$message->image) }}"
-                                class="max-w-[220px] rounded-xl mb-2 cursor-pointer"
+                                class="
+                                    max-w-[180px]
+                                    md:max-w-[220px]
+                                    rounded-xl
+                                    mb-2
+                                    cursor-pointer
+                                "
                                 onclick="window.open(this.src)">
 
                         @endif
@@ -141,7 +155,17 @@
         </div>
 
         <!-- QUICK REPLY -->
-        <div class="px-4 pt-4 flex flex-wrap gap-2 bg-white border-t">
+        <div class="
+            px-3
+            md:px-4
+            pt-3
+            flex
+            flex-wrap
+            gap-2
+            bg-white
+            border-t
+            overflow-x-auto
+        ">
 
             <button
                 type="button"
@@ -194,19 +218,36 @@
         <form
             id="chat-form"
             enctype="multipart/form-data"
-            class="p-4 flex gap-3 items-center">
+            class="
+                p-3
+                md:p-4
+                flex
+                items-center
+                gap-3
+                border-t
+            ">
 
             @csrf
 
             <label
-                class="cursor-pointer
+                class="
+                    flex-shrink-0
+                    cursor-pointer
                     bg-gray-100
                     hover:bg-gray-200
-                    w-14 h-14
+                    w-14
+                    h-14
                     rounded-2xl
-                    flex items-center justify-center">
+                    flex
+                    items-center
+                    justify-center
+                    transition
+                ">
 
-                <i data-lucide="image" class="w-5 h-5"></i>
+                <i
+                    data-lucide="image"
+                    class="w-6 h-6 text-gray-500">
+                </i>
 
                 <input
                     type="file"
@@ -221,24 +262,40 @@
                 id="message"
                 name="message"
                 placeholder="Ketik balasan..."
-                class="flex-1 border rounded-xl px-4 py-3">
+                class="
+                    flex-1
+                    h-14
+                    border-2
+                    border-gray-300
+                    rounded-2xl
+                    px-5
+                    text-sm
+                    md:text-base
+                    focus:outline-none
+                    focus:border-red-400
+                    min-w-0
+                ">
 
             <button
                 type="submit"
                 class="
-                    h-[50px]
-                    min-w-[110px]
+                    flex-shrink-0
+                    w-14
+                    h-14
                     bg-red-400
                     hover:bg-red-500
                     text-white
-                    rounded-xl
-                    font-semibold
+                    rounded-2xl
                     flex
                     items-center
                     justify-center
+                    transition
                 ">
 
-                Kirim
+                <i
+                    data-lucide="send-horizontal"
+                    class="w-5 h-5">
+                </i>
 
             </button>
 
@@ -305,6 +362,8 @@ function setQuickReply(text) {
 
 
 window.onload = function () {
+
+    lucide.createIcons();
 
     loadChat(true);
 
@@ -505,7 +564,7 @@ function loadChat(forceScroll = false) {
                 }">
 
                     <div class="
-                        max-w-[75%]
+                        max-w-[85%] md:max-w-[75%]
                         px-4 py-2
                         rounded-2xl
                         text-sm
@@ -523,7 +582,13 @@ function loadChat(forceScroll = false) {
                             ? `
                                 <img
                                     src="/storage/${message.image}"
-                                    class="max-w-[220px] rounded-xl mb-2 cursor-pointer"
+                                    class="
+                                    max-w-[180px]
+                                    md:max-w-[220px]
+                                    rounded-xl
+                                    mb-2
+                                    cursor-pointer
+                                "
                                     onclick="window.open(this.src)">
                             `
                             : ''

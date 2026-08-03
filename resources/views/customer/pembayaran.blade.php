@@ -296,7 +296,7 @@
                     </span>
 
                     <span class="font-medium">
-                        Rp 1.000
+                        Rp {{ number_format(config('app.admin_fee'), 0, ',', '.') }}
                     </span>
 
                 </div>
@@ -317,7 +317,7 @@
                 <span id="totalAkhir"
                     class="text-lg font-bold text-red-500">
 
-                    Rp {{ number_format($subtotal + 1000,0,',','.') }}
+                    Rp {{ number_format($subtotal + config('app.admin_fee'), 0, ',', '.') }}
 
                 </span>
 
@@ -727,7 +727,7 @@ async function updateOngkir() {
     let harga =
         {{ $subtotal }};
 
-    let admin = 1000;
+    let admin = {{ config('app.admin_fee') }};
 
     let ongkir = 0;
 

@@ -62,7 +62,7 @@
 
                     </div>
 
-                    <!-- NAMA + PESAN -->
+                    <!-- NAMA + NOMOR + PESAN -->
                     <div class="flex-1 min-w-0">
 
                         <h3
@@ -71,6 +71,23 @@
                             {{ $chat->customer->name }}
 
                         </h3>
+
+                        <div
+                            class="flex items-center gap-1
+                                text-sm text-gray-400 mb-1">
+
+                            <i
+                                data-lucide="phone"
+                                class="w-3.5 h-3.5">
+                            </i>
+
+                            <span class="truncate">
+
+                                {{ $chat->customer->phone ?? '-' }}
+
+                            </span>
+
+                        </div>
 
                         <p
                             class="text-gray-500 truncate">

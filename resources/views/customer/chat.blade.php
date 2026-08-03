@@ -2,9 +2,25 @@
 
 @section('content')
 
-<div class="max-w-3xl mx-auto p-6">
+<div
+class="
+    max-w-3xl
+    mx-auto
+    px-4
+    py-4
+    h-[calc(100vh-90px)]
+">
 
-    <div class="bg-white rounded-2xl shadow overflow-hidden">
+    <div
+    class="
+        bg-white
+        rounded-2xl
+        shadow
+        overflow-hidden
+        h-[calc(100vh-180px)]
+        flex
+        flex-col
+    ">
 
         <!-- HEADER -->
         <div class="bg-red-400 text-white p-4">
@@ -21,8 +37,15 @@
 
         <!-- CHAT BODY -->
         <div
-            id="chat-box"
-            class="h-[448px] overflow-y-auto p-4 bg-gray-50 space-y-3">
+        id="chat-box"
+        class="
+            flex-1
+            overflow-y-auto
+            p-3
+            md:p-6
+            bg-gray-50
+            space-y-4
+        ">
 
             @php
                 $lastDate = null;
@@ -74,7 +97,7 @@
 
                     <div
                         class="
-                        max-w-[75%]
+                        max-w-[85%] md:max-w-[75%]
                         px-4 py-2
                         rounded-2xl
                         text-sm
@@ -89,7 +112,13 @@
 
                             <img
                                 src="{{ asset('storage/'.$message->image) }}"
-                                class="max-w-[220px] rounded-xl mb-2 cursor-pointer"
+                                class="
+                                    max-w-[180px]
+                                    md:max-w-[220px]
+                                    rounded-xl
+                                    mb-2
+                                    cursor-pointer
+                                "
                                 onclick="window.open(this.src)">
 
                         @endif
@@ -140,19 +169,36 @@
         <form
             id="chat-form"
             enctype="multipart/form-data"
-            class="border-t p-4 flex gap-3 items-center">
+            class="
+                border-t
+                p-3
+                md:p-4
+                flex
+                items-center
+                gap-3
+            ">
 
             @csrf
 
             <label
-                class="cursor-pointer
-                    bg-gray-100
-                    hover:bg-gray-200
-                    w-14 h-14
-                    rounded-2xl
-                    flex items-center justify-center">
+            class="
+                flex-shrink-0
+                cursor-pointer
+                bg-gray-100
+                hover:bg-gray-200
+                w-14
+                h-14
+                rounded-2xl
+                flex
+                items-center
+                justify-center
+                transition
+            ">
 
-                <i data-lucide="image" class="w-5 h-5"></i>
+                <i
+                    data-lucide="image"
+                    class="w-6 h-6 text-gray-500">
+                </i>
 
                 <input
                     type="file"
@@ -163,31 +209,43 @@
             </label>
 
             <input
-                type="text"
-                id="message"
-                class="
-                    flex-1
-                    h-14
-                    border
-                    rounded-2xl
-                    px-5
-                "
-                placeholder="Ketik pesan...">
+            type="text"
+            id="message"
+            class="
+                flex-1
+                h-14
+                border-2
+                border-gray-300
+                rounded-2xl
+                px-5
+                text-sm
+                md:text-base
+                focus:outline-none
+                focus:border-red-400
+                min-w-0
+            "
+            placeholder="Ketik pesan...">
 
             <button
-                type="submit"
-                class="
-                    h-14
-                    min-w-[120px]
-                    bg-red-400
-                    hover:bg-red-500
-                    text-white
-                    font-semibold
-                    rounded-2xl
-                    transition
-                ">
+            type="submit"
+            class="
+                flex-shrink-0
+                w-14
+                h-14
+                bg-red-400
+                hover:bg-red-500
+                text-white
+                rounded-2xl
+                flex
+                items-center
+                justify-center
+                transition
+            ">
 
-                Kirim
+                <i
+                    data-lucide="send-horizontal"
+                    class="w-5 h-5">
+                </i>
 
             </button>
 
@@ -239,11 +297,17 @@ imageInput.addEventListener(
     }
 );
 
-window.onload = function () {
+window.addEventListener('load', () => {
 
-    loadChat(true);
+    lucide.createIcons();
 
-};
+    setTimeout(() => {
+
+        loadChat(true);
+
+    }, 300);
+
+});
 
 
 document
@@ -439,7 +503,7 @@ function loadChat(forceScroll = false) {
                 }">
 
                     <div class="
-                        max-w-[75%]
+                        max-w-[85%] md:max-w-[75%]
                         px-4 py-2
                         rounded-2xl
                         text-sm
@@ -457,7 +521,13 @@ function loadChat(forceScroll = false) {
                             ? `
                                 <img
                                     src="/storage/${message.image}"
-                                    class="max-w-[220px] rounded-xl mb-2 cursor-pointer"
+                                    class="
+                                        max-w-[180px]
+                                        md:max-w-[220px]
+                                        rounded-xl
+                                        mb-2
+                                        cursor-pointer
+                                    "
                                     onclick="window.open(this.src)">
                             `
                             : ''
@@ -502,18 +572,16 @@ function loadChat(forceScroll = false) {
 
         chatBox.innerHTML = html;
 
+        setTimeout(() => {
 
-        if (isNearBottom || forceScroll) {
+            if (isNearBottom || forceScroll) {
 
-            chatBox.scrollTo({
+                chatBox.scrollTop =
+                    chatBox.scrollHeight;
 
-                top: chatBox.scrollHeight,
+            }
 
-                behavior: 'smooth'
-
-            });
-
-        }
+        }, 150);
 
     });
 

@@ -192,7 +192,15 @@
                             <button
                                 type="button"
                                 onclick="openLogoutModal()"
-                                class="flex items-center gap-1 text-red-500 hover:text-red-600 transition"
+                                class="
+                                    flex
+                                    items-center
+                                    gap-1
+                                    whitespace-nowrap
+                                    text-gray-500
+                                    hover:text-red-500
+                                    transition
+                                "
                             >
 
                                 <i
